@@ -154,7 +154,6 @@ class Piece extends Entity {
     private void calcMove(int steps){
         // 22번째 칸에서는 오던 방향에 따라 진행 방향이 다르기때문에 처리해주어야함
         // TODO: 말이 0번째 칸에 있는데 백도가 또 나오면 어떻게 처리해야할지
-        // TODO: 아직 말이 완주를 했다는 판정이 없음
         for (int i = 0; i < 2; i++) {this.candidateSlots[i] = null;}
         if (steps == -1){
             if (this.slot.num == 0){
