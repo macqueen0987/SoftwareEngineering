@@ -1,5 +1,9 @@
+package main;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static java.lang.foreign.MemorySegment.NULL;
 
 class Entity {
 //    public int x;
@@ -68,10 +72,10 @@ class BoardSlot extends Entity {
     /**
      * 윷놀이판의 각각의 칸을 나타내는 클래스
      */
-    public BoardSlot(int num) {
+    public BoardSlot(int num, int polygon) {
         this.num = num;
-        this.next = new BoardSlot[2];
-        this.prev = new BoardSlot[2];
+        this.next = new BoardSlot[polygon];
+        this.prev = new BoardSlot[polygon];
     }
 
     public void removePiece(){
@@ -87,7 +91,7 @@ class BoardSlot extends Entity {
     }
 
     /**
-     * @param num 0: 다음 칸, 1: 다음 칸(칸이 2개인 경우)
+     * @param num 0: 다음 칸, n: 다음 칸(칸이 n개인 경우)
      * @param next 다음 칸
      */
     public void setNext(int num, BoardSlot next) {
@@ -95,7 +99,7 @@ class BoardSlot extends Entity {
     }
 
     /**
-     * @param num 0: 이전 칸, 1: 이전 칸(칸이 2개인 경우)
+     * @param num 0: 이전 칸, n: 이전 칸(칸이 n개인 경우)
      * @param prev 이전 칸
      */
     public void setPrev(int num, BoardSlot prev) {
@@ -115,7 +119,8 @@ class Piece extends Entity {
     private int count;
     private Player player;
     public BoardSlot slot;
-    private BoardSlot [] candidateSlots = new BoardSlot[2];
+    private BoardSlot [] candidateSlots;
+    private MoveCalculator calculator = new MoveCalculator();
 
     /**
      * 윷놀이에서 말을 나타내는 클래스
@@ -126,10 +131,11 @@ class Piece extends Entity {
         this.count = 1;
         this.player = player;
         this.slot = slot;
+        this.candidateSlots = new BoardSlot[this.calculator.polygon];
     }
 
     public void printStatus(){
-        System.out.println("Piece at: " + this.slot.num + ", count: " + this.count);
+        System.out.println("main.Piece at: " + this.slot.num + ", count: " + this.count);
     }
 
     public int getSlotNum() {
@@ -151,9 +157,13 @@ class Piece extends Entity {
         return this.player;
     }
 
+    private void extendCalcMove(int steps){
+        candidateSlots = calculator.calcMove(steps);
+    }
+
     private void calcMove(int steps){
         // 22번째 칸에서는 오던 방향에 따라 진행 방향이 다르기때문에 처리해주어야함
-        // TODO: 말이 0번째 칸에 있는데 백도가 또 나오면 어떻게 처리해야할지
+        // 0번째 칸 빽도는 마지막 칸으로 이동하는 것으로 구현
         for (int i = 0; i < 2; i++) {this.candidateSlots[i] = null;}
         if (steps == -1){
             if (this.slot.num == 0){
@@ -174,9 +184,9 @@ class Piece extends Entity {
             if (this.slot.getNext()[i] != null){
                 BoardSlot tempslot = this.slot.getNext()[i];
                 for (int j = 0; j < steps-1; j++){
-                    if(tempslot.num == 0 && steps-1 >= 0){
+                    if(tempslot.num == 0 && steps-j-1 >= 0){
                         // 시작점으로 말이 되돌아 왔고 말이 나갈 수 있으면 그만 계산
-                        this.candidateSlots[i] = new BoardSlot(-1); // 나갈 수 있음
+                        this.candidateSlots[i] = new BoardSlot(-1, 4); // 나갈 수 있음
                         return;
                     }
                     if (tempslot.num == 18){
@@ -200,6 +210,7 @@ class Piece extends Entity {
             if (this.candidateSlots[i] != null){
                 if (this.candidateSlots[i].num == -1){
                     System.out.println((i+1) + ": finish");
+                    break;
                 } else {
                     System.out.println((i+1) + ": " + this.candidateSlots[i].num);
                 }
@@ -227,7 +238,7 @@ class Piece extends Entity {
             return false;
         }
         if (this.slot.getPiece() != null){
-            System.out.println("Piece at " + this.slot.num + " already exists");
+            System.out.println("main.Piece at " + this.slot.num + " already exists");
             Piece piece = this.slot.getPiece();
             if (piece.getPlayer() == this.player){
                 piece.group(this);
@@ -248,54 +259,59 @@ class Piece extends Entity {
 
 class Board {
     private final BoardSlot [] slots;
-
+    private int side;    // (윷놀이 판을 구성하는 각변의 slot 개수) - 1
+    private int diagnal; // (윷놀이 판을 구성하는 대각선 - 3) /2
+    private int polygon; // 윷놀이 판은 기본 4각형
     /**
      * 윷놀이판을 나타내는 클래스
      * <pre><code>
      *(10)  (9)  (8)  (7)  (6)   (5)
-     *(11) (25)            (20)  (4)
-     *(12)      (26)   (21)      (3)
-     *             (22)
-     *(13)      (27)   (23)      (2)
-     *(14) (28)            (24)  (1)
+     *(11) (25)            (23)  (4)
+     *(12)      (26)   (24)      (3)
+     *             (20)
+     *(13)      (27)   (21)      (2)
+     *(14) (28)            (22)  (1)
      *(15) (16) (17) (18)  (19)  (0)
      * </code></pre>
      */
-    public Board(){
-        this.slots = new BoardSlot[29];
+    public Board(int side, int diagnal, int polygon){
+        this.side = side;
+        this.diagnal = diagnal;
+        this.polygon = polygon;
+        this.slots = new BoardSlot[(side + diagnal) * polygon + 1];
         for (int i = 0; i < this.slots.length; i++) {
-            this.slots[i] = new BoardSlot(i);
+            this.slots[i] = new BoardSlot(i, polygon);
         }
         this.linkSlots();
     }
 
     private void linkSlots() {
-        for (int i = 0; i < 19; i++) {
+        for (int i = 0; i <= side * polygon - 1; i++) {         // 외곽선 슬롯들 연결
             this.slots[i].setNext(0, this.slots[i + 1]);
             this.slots[i + 1].setPrev(0, this.slots[i]);
+            if(i == side * polygon - 1){
+                this.slots[i].setNext(0, this.slots[0]);
+                this.slots[0].setPrev(0, this.slots[i]);
+            }
         }
-        for (int i = 20; i < 24; i++) {
-            this.slots[i].setNext(0, this.slots[i+1]);
-            this.slots[i + 1].setPrev(0, this.slots[i]);
+        for(int i = 0; i < polygon; i++){                       // 대각선 슬롯들 연결
+            for (int j = 1; j <= diagnal; j++){
+                this.slots[side*polygon + i*diagnal + j].setNext(0, this.slots[side*polygon + i*diagnal + j + 1]);
+                this.slots[side*polygon + i*diagnal + j + 1].setPrev(0, this.slots[side*polygon + i*diagnal + j]);
+            }
+            if (i <= (polygon + 1)/2 - 1){
+                this.slots[((i+1) * polygon) % 20].setNext(1, this.slots[side*polygon + i*diagnal + 1]);
+                this.slots[side*polygon + i*diagnal + 1].setPrev(0, this.slots[((i+1) * polygon) % 20]);
+                this.slots[side*polygon + (i+1)*diagnal].setNext(0, this.slots[side * polygon]);
+                this.slots[side * polygon].setPrev(i, this.slots[side*polygon + (i+1)*diagnal]);
+            }
+            else{
+                this.slots[side*polygon + i*diagnal + 1].setNext(0, this.slots[((i+1) * polygon) % 20]);
+                this.slots[((i+1) * polygon) % 20].setPrev(1, this.slots[side*polygon + i*diagnal + 1]);
+                this.slots[side * polygon].setNext(i - (polygon + 1)/2, this.slots[side*polygon + (i+1)*diagnal]);
+                this.slots[side*polygon + (i+1)*diagnal].setPrev(0, this.slots[side * polygon]);
+            }
         }
-        this.slots[25].setNext(0, this.slots[26]);
-        this.slots[25].setPrev(0, this.slots[10]);
-        this.slots[26].setNext(0, this.slots[22]);
-        this.slots[26].setPrev(0, this.slots[25]);
-        this.slots[27].setNext(0, this.slots[28]);
-        this.slots[27].setPrev(0, this.slots[22]);
-        this.slots[28].setNext(0, this.slots[15]);
-        this.slots[28].setPrev(0, this.slots[27]);
-        this.slots[24].setNext(0, this.slots[0]);
-        this.slots[19].setNext(0, this.slots[0]);
-        this.slots[5].setNext(1, this.slots[20]);
-        this.slots[10].setNext(1, this.slots[25]);
-        this.slots[22].setNext(1, this.slots[27]);
-        this.slots[0].setPrev(0, this.slots[19]);
-        this.slots[0].setPrev(1, this.slots[24]);
-        this.slots[15].setPrev(1, this.slots[28]);
-        this.slots[20].setPrev(0, this.slots[5]);
-        this.slots[22].setPrev(1, this.slots[26]);
     }
 
 
@@ -369,7 +385,7 @@ class Player {
     }
 
     public void score(int score) {
-        System.out.println("Player " + this.player + " score " + score);
+        System.out.println("main.Player " + this.player + " score " + score);
         this.score += score;
     }
 
@@ -406,4 +422,27 @@ class Player {
 //    public void reducePieceCount(int num) {
 //        this.pieceCount -= num;
 //    }
+}
+
+class MoveCalculator {
+    static private int side;
+    static private int diagnal;
+    static public int polygon;
+
+    public MoveCalculator(int side, int diagnal, int polygon){
+        MoveCalculator.side = side;
+        MoveCalculator.diagnal = diagnal;
+        MoveCalculator.polygon = polygon;
+    }
+
+    public MoveCalculator() {
+
+    }
+
+    public BoardSlot[] calcMove(int steps){
+        BoardSlot[] boardSlots = new BoardSlot[polygon];
+
+
+        return boardSlots;
+    }
 }
