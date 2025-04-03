@@ -67,6 +67,7 @@ class Game {
     private boolean handleTurn(Player player) {
         clearScreen();
         this.testprint();
+        board.testPrint();
         System.out.println("main.Player " + player.getPlayer() + "'s turn");
         System.out.print("Press Enter to throw the sticks...");
         Scanner scanner = new Scanner(System.in);
@@ -201,7 +202,7 @@ class Game {
 
 public class Main {
     public static void main(String[] args) {
-        Game game = new Game(1, 4, 4);  // default: 4
+        Game game = new Game(1, 4, 5);  // default: 4
         game.play();
     }
 }
