@@ -30,6 +30,7 @@ class Game {
     }
 
     public void testprint(){
+        // 4각형 board의 경우
         System.out.println("(10)  (9)  (8)  (7)  (6)   (5)");
         System.out.println("(11) (23)            (21)  (4)");
         System.out.println("(12)      (24)   (22)      (3)");
@@ -67,7 +68,7 @@ class Game {
     private boolean handleTurn(Player player) {
         clearScreen();
         this.testprint();
-        board.testPrint();
+        //board.testPrint();
         System.out.println("main.Player " + player.getPlayer() + "'s turn");
         System.out.print("Press Enter to throw the sticks...");
         Scanner scanner = new Scanner(System.in);
@@ -202,7 +203,7 @@ class Game {
 
 public class Main {
     public static void main(String[] args) {
-        Game game = new Game(1, 4, 5);  // default: 4
+        Game game = new Game(1, 4, 4);  // default: 4
         game.play();
     }
 }

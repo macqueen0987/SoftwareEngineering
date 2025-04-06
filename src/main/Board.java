@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static java.lang.foreign.MemorySegment.NULL;
+import static main.MoveCalculator.*;
 
 class Entity {
 //    public int x;
@@ -64,8 +65,8 @@ class Sticks{
 }
 
 class BoardSlot extends Entity {
-    private BoardSlot[] next;
-    private BoardSlot[] prev;
+    private final BoardSlot[] next;
+    private final BoardSlot[] prev;
     private Piece piece;
     final int num;
 
@@ -76,6 +77,13 @@ class BoardSlot extends Entity {
         this.num = num;
         this.next = new BoardSlot[polygon];
         this.prev = new BoardSlot[polygon];
+    }
+
+    public BoardSlot(BoardSlot boardSlot){
+        this.next = boardSlot.getNext();
+        this.prev = boardSlot.getPrev();
+        this.piece = boardSlot.getPiece();
+        this.num = boardSlot.num;
     }
 
     public void removePiece(){
@@ -94,9 +102,7 @@ class BoardSlot extends Entity {
      * @param num 0: 다음 칸, n: 다음 칸(칸이 n개인 경우)
      * @param next 다음 칸
      */
-    public void setNext(int num, BoardSlot next) {
-        this.next[num] = next;
-    }
+    public void setNext(int num, BoardSlot next) { this.next[num] = next; }
 
     /**
      * @param num 0: 이전 칸, n: 이전 칸(칸이 n개인 경우)
@@ -106,9 +112,7 @@ class BoardSlot extends Entity {
         this.prev[num] = prev;
     }
 
-    public BoardSlot [] getNext() {
-        return this.next;
-    }
+    public BoardSlot [] getNext() { return this.next; }
 
     public BoardSlot [] getPrev() {
         return this.prev;
@@ -131,7 +135,7 @@ class Piece extends Entity {
         this.count = 1;
         this.player = player;
         this.slot = slot;
-        this.candidateSlots = new BoardSlot[MoveCalculator.polygon];
+        this.candidateSlots = new BoardSlot[polygon];
     }
 
     public void printStatus(){
@@ -167,15 +171,15 @@ class Piece extends Entity {
             return;
         }
         this.extendCalcMove(steps);
-        for (int i = 0; i < 2; i++){
-            if (this.candidateSlots[i] != null){
-                if (this.candidateSlots[i].num == -1){
-                    System.out.println((i+1) + ": finish");
-                    break;
-                } else {
-                    System.out.println((i+1) + ": " + this.candidateSlots[i].num);
-                }
+        int i = 0;
+        while(candidateSlots[i].num < (MoveCalculator.side+ MoveCalculator.diagnal) * MoveCalculator.polygon + 1){
+            if (this.candidateSlots[i].num == -1) {
+                System.out.println((i + 1) + ": finish");
+                break;
+            } else {
+                System.out.println((i + 1) + ": " + this.candidateSlots[i].num);
             }
+            i++;
         }
     }
 
@@ -247,6 +251,13 @@ class Board {
     }
 
     private void linkSlots() {
+        BoardSlot emptySlot = new BoardSlot((side+diagnal)*polygon + 1, polygon);
+        for(int i = 0; i < (side+diagnal)*polygon + 1; i++){    // board의 가능한 next, prev 이외에는 전부 invaild 값을 갖도록 초기화
+            for(int j = 0; j < polygon; j++){
+                slots[i].setNext(j, emptySlot);
+                slots[i].setPrev(j, emptySlot);
+            }
+        }
         for (int i = 0; i <= side * polygon - 1; i++) {         // 외곽선 슬롯들 연결
             this.slots[i].setNext(0, this.slots[i + 1]);
             this.slots[i + 1].setPrev(0, this.slots[i]);
@@ -260,13 +271,13 @@ class Board {
                 this.slots[side*polygon + i*diagnal + j].setNext(0, this.slots[side*polygon + i*diagnal + j + 1]);
                 this.slots[side*polygon + i*diagnal + j + 1].setPrev(0, this.slots[side*polygon + i*diagnal + j]);
             }
-            if (i <= (polygon - 1)/2){
+            if (i <= (polygon - 1)/2){          // 중앙으로 향하는 대각선
                 this.slots[((i+1) * side) % (side*polygon)].setNext(1, this.slots[side*polygon + i*diagnal + 1]);
                 this.slots[side*polygon + i*diagnal + 1].setPrev(0, this.slots[((i+1) * side) % (side*polygon)]);
                 this.slots[side*polygon + (i+1)*diagnal].setNext(0, this.slots[side * polygon]);
                 this.slots[side * polygon].setPrev(i, this.slots[side*polygon + (i+1)*diagnal]);
             }
-            else{
+            else{                               // 중앙에서 멀어지는 대각선
                 this.slots[side*polygon + (i+1)*diagnal].setNext(0, this.slots[((i+1) * side) % (side*polygon)]);
                 this.slots[((i+1) * side) % (side*polygon)].setPrev(1, this.slots[side*polygon + (i+1)*diagnal]);
                 this.slots[side * polygon].setNext(i - (polygon + 1)/2, this.slots[side*polygon + i*diagnal + 1]);
@@ -305,7 +316,7 @@ class Board {
      * 시작칸을 리턴
      * */
     public BoardSlot getFirstSlot(){
-        return this.slots[0];
+        return slots[0];
     }
 }
 
@@ -386,8 +397,8 @@ class Player {
 }
 
 class MoveCalculator {
-    static private int side;
-    static private int diagnal;
+    static public int side;
+    static public int diagnal;
     static public int polygon;
 
     public MoveCalculator(int side, int diagnal, int polygon){
@@ -401,35 +412,46 @@ class MoveCalculator {
     }
 
     public BoardSlot[] calcMove(int steps, BoardSlot slot){
-        BoardSlot[] boardSlots;
+        BoardSlot[] nextSlots = new BoardSlot[polygon];
         BoardSlot currentSlot = slot;
-        int moveONMid = 0;
+        int prevSlotNum = 0;
         int nDiagnal = 0;
         if (steps == -1){
-            boardSlots = currentSlot.getPrev();
-            return boardSlots;
+            for(int i = 0; i < polygon; i++){
+                nextSlots[i] = new BoardSlot(currentSlot.getPrev()[i]);
+            }
+            return nextSlots;
         }
-        boardSlots = currentSlot.getNext();
-        for (int i = 0; i < boardSlots.length; i++) {
-            for (int j = 0; j < steps; j++) {
-                if (boardSlots[i].getNext()[0].num == side * polygon) {
-                    moveONMid = 1;
-                    nDiagnal = (boardSlots[i].num - side * polygon) / diagnal - 1;
+        for(int i = 0; i < polygon; i++){
+            nextSlots[i] = new BoardSlot(currentSlot.getNext()[i]);
+        }
+        if (nextSlots[0].num == 0){
+            nextSlots[0] = new BoardSlot(-1, polygon);
+            return nextSlots;
+        }
+        prevSlotNum = currentSlot.num;
+        int i = 0;
+        while(nextSlots[i].num < (side+diagnal) * polygon + 1)
+        {
+            for (int j = 0; j < steps - 1; j++) {
+                if (nextSlots[i].num == 0){
+                    nextSlots[i] = new BoardSlot(-1, polygon);
+                    break;
+                }
+                if (nextSlots[i].num == side * polygon) {
+                    nDiagnal = (prevSlotNum - side*polygon) / diagnal - 1;
                     if (polygon % 2 != 0 && nDiagnal == polygon / 2 + 1) {
                         nDiagnal -= 1;
                     }
-                }
-                if (moveONMid == 1) {
-                    boardSlots[i] = boardSlots[i].getNext()[nDiagnal];
+                    prevSlotNum = nextSlots[i].num;
+                    nextSlots[i] = nextSlots[i].getNext()[nDiagnal];
                 } else {
-                    boardSlots[i] = boardSlots[i].getNext()[0];
-                }
-                if (boardSlots[i].num == 0){
-                    boardSlots[i] = new BoardSlot(-1, polygon);
-                    break;
+                    prevSlotNum = nextSlots[i].num;
+                    nextSlots[i] = nextSlots[i].getNext()[0];
                 }
             }
+            i++;
         }
-        return boardSlots;
+        return nextSlots;
     }
 }
