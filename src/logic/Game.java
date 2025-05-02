@@ -1,6 +1,7 @@
 package logic;
 
 import view.BoardPanel;
+import view.OptionPanel;
 import view.StickPanel;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class Game {
         if (pendingThrows.isEmpty()) return;
 
         int moveValue = pendingThrows.remove(0);
+        boolean bonusTurn = (moveValue == 4 || moveValue == 5);
 
         Piece target;
         if (current.getPieces().isEmpty()) {
@@ -52,12 +54,34 @@ public class Game {
         }
 
         BoardSlot[] candidates = target.getMoveCandidates(moveValue);
-        BoardSlot dest = candidates[0] != null ? candidates[0] : candidates[1];
-        if (dest != null) target.move(dest);
+        BoardSlot dest = null;
+
+        // --- 경로 선택 처리 추가 ---
+        if (candidates[0] != null && candidates[1] != null) {
+            // 선택 가능 (2개 다 있음)
+            String[] options = { "왼쪽 경로", "오른쪽 경로" };
+            int choice = OptionPanel.select("어느 경로로 이동하시겠습니까?", options);
+            dest = candidates[choice];
+        }
+        else if (candidates[0] != null) {
+            // 왼쪽만 있음 → 자동 선택
+            dest = candidates[0];
+        }
+        else if (candidates[1] != null) {
+            // 오른쪽만 있음 → 자동 선택
+            dest = candidates[1];
+        }
+
+        // --- 선택한 dest로 이동 ---
+        boolean caught = false;
+        if (dest != null) {
+            caught = target.move(dest);
+        }
 
         updateBoardView();
 
-        if (pendingThrows.isEmpty()) {
+        // 윷/모 또는 잡았을 때 → 추가 턴 (턴 넘기지 않음)
+        if (pendingThrows.isEmpty() && !bonusTurn && !caught) {
             turn = (turn + 1) % players.size();
         }
     }

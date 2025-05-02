@@ -35,16 +35,21 @@ public class Piece extends Entity {
         if (dest.getPiece() != null) {
             Piece other = dest.getPiece();
             if (other.owner == this.owner) {
+                // 같은 팀 → 합치기
                 other.count += this.count;
                 owner.removePiece(this);
                 return false;
             } else {
+                // 상대 팀 → 잡기
                 other.owner.removePiece(other);
+                dest.removePiece();
+                dest.addPiece(this);
+                return true;  // 여기서 true 반환
             }
         }
 
         dest.addPiece(this);
-        return dest.num == 0;
+        return false;
     }
 
     public BoardSlot getSlot() { return slot; }
