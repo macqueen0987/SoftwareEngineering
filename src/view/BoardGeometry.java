@@ -4,7 +4,7 @@ import java.awt.*;
 
 public final class BoardGeometry {
 
-    /* 기준 보드 크기(그림 원본) : 550×550px  */
+    /* 기준 보드 크기(그림 원본) */
     private static final int BASE = 550;
 
     /* 슬롯별 절대 좌표 (X, Y) – 그림과 동일 */

@@ -3,6 +3,8 @@ package view;
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.awt.Image;
+
 
 /** /resources/img/ 아래 PNG를 캐싱해서 반환 */
 public final class ResourceLoader {
@@ -25,12 +27,23 @@ public final class ResourceLoader {
     public static ImageIcon stick(boolean front) {     // true = 앞면
         return load(front ? "stick_front.png" : "stick_back.png");
     }
+
     public static ImageIcon backdo() {                 // 백도 전용
         return load("stick_backdo.png");
     }
-    public static ImageIcon piece(String color) {      // 말 아이콘
+
+    /* 말 아이콘 (원본 크기) */
+    public static ImageIcon piece(String color) {
         return load("piece_" + color.toLowerCase() + ".png");
     }
 
+    /* 말 아이콘을 원하는 크기로 축소/확대 */
+    public static ImageIcon piece(String color, int size) {
+        ImageIcon src = piece(color);
+        Image scaled  = src.getImage()
+                        .getScaledInstance(size, size, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
+    }
+    
     private ResourceLoader() {}
 }

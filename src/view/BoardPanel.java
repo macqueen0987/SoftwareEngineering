@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.Set;
 
 /** 윷판만 그리는 Swing 패널 (점, 선, 말, 하이라이트까지) */
 public class BoardPanel extends JPanel {
@@ -13,7 +14,7 @@ public class BoardPanel extends JPanel {
 
     /* ---------- 상태 ---------- */
     private Integer highlight = null;                 // 클릭된 슬롯
-    // private List<Piece> pieces = List.of(); // 빈 리스트로 초기화
+    // private List<Piece> pieces = List.of(); // 빈 리스트로 초기화, 임시 데이터 지우고 할 것
     private List<Piece> pieces = List.of(             // 임시 데이터
             new Piece(0 , "RED"  ,0),
             new Piece(22, "BLUE" ,0),
@@ -79,13 +80,29 @@ public class BoardPanel extends JPanel {
     }
 
     private void drawSlots(Graphics2D g) {
-        g.setColor(Color.BLACK);
         g.setFont(new Font("SansSerif", Font.PLAIN, 10));
+
+        // 강조할 슬롯 번호 목록 (꼭짓점 및 중앙)
+        Set<Integer> specialSlots = Set.of(0, 5, 10, 15, 22);
+
         for (int i = 0; i < BoardGeometry.SLOT.length; i++) {
             Point p = BoardGeometry.SLOT[i];
-            g.fillOval(p.x - 5, p.y - 5, 10, 10);
-            g.drawString(String.valueOf(i), p.x - 12, p.y - 8);
+            int R = specialSlots.contains(i) ? 30 : 20; // 슬롯 크기
+        
+            // 1. 슬롯 채우기 (연갈색)
+            g.setColor(new Color(163, 115, 33));
+            g.fillOval(p.x - R, p.y - R, 2 * R, 2 * R);
+        
+            // 2. 슬롯 테두리 (진한 갈색)
+            g.setColor(new Color(100, 70, 20));
+            g.setStroke(new BasicStroke(2f));
+            g.drawOval(p.x - R, p.y - R, 2 * R, 2 * R);
+        
+            // 3. 번호 (회색)
+            g.setColor(Color.DARK_GRAY);
+            g.drawString(String.valueOf(i), p.x - R - 7, p.y - R - 3);
         }
+        
     }
 
     private void drawPieces(Graphics2D g) {
