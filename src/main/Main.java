@@ -1,4 +1,5 @@
-import java.lang.reflect.Array;
+package main;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -7,29 +8,35 @@ class Game {
     private Board board;
     private Sticks sticks;
     private ArrayList<Integer> stickResults;
+    private MoveCalculator calculator;
+
 
     /**
      * 새로운 윷놀이 게임을 생성
      * @param playerCount 플레이어 수
      * @param piecePerPlayer 각 플레이어의 말 개수
      */
-    public Game(int playerCount, int piecePerPlayer) {
-        this.board = new Board();
+    public Game(int playerCount, int piecePerPlayer, int polygon) {
+        int side = 5;
+        int diagnal = 2;
+        this.board = new Board(side, diagnal, polygon);    //TODO user input으로 값을 받도록 수정
         this.players = new Player[playerCount];
         this.sticks = new Sticks();
         for (int i = 0; i < playerCount; i++) {
             this.players[i] = new Player(i, piecePerPlayer);
         }
         this.stickResults = new ArrayList<>();
+        this.calculator = new MoveCalculator(side, diagnal, polygon);
     }
 
     public void testprint(){
+        // 4각형 board의 경우
         System.out.println("(10)  (9)  (8)  (7)  (6)   (5)");
-        System.out.println("(11) (25)            (20)  (4)");
-        System.out.println("(12)      (26)   (21)      (3)");
-        System.out.println("             (22)");
-        System.out.println("(13)      (27)   (23)      (2)");
-        System.out.println("(14) (28)            (24)  (1)");
+        System.out.println("(11) (23)            (21)  (4)");
+        System.out.println("(12)      (24)   (22)      (3)");
+        System.out.println("             (20)");
+        System.out.println("(13)      (25)   (27)      (2)");
+        System.out.println("(14) (26)            (28)  (1)");
         System.out.println("(15) (16) (17) (18)  (19)  (0)");
     }
 
@@ -47,7 +54,7 @@ class Game {
     }
 
     private void displayStickResults(){
-        System.out.println("Sticks thrown: ");
+        System.out.println("main.Sticks thrown: ");
         for (int i = 0; i < this.stickResults.size(); i++) {
             System.out.print((i+1) + ": " + this.stickResults.get(i) + " ");
         }
@@ -61,7 +68,8 @@ class Game {
     private boolean handleTurn(Player player) {
         clearScreen();
         this.testprint();
-        System.out.println("Player " + player.getPlayer() + "'s turn");
+        //board.testPrint();
+        System.out.println("main.Player " + player.getPlayer() + "'s turn");
         System.out.print("Press Enter to throw the sticks...");
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
@@ -195,7 +203,7 @@ class Game {
 
 public class Main {
     public static void main(String[] args) {
-        Game game = new Game(1, 4);
+        Game game = new Game(1, 4, 4);  // default: 4
         game.play();
     }
 }
