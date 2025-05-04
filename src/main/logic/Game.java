@@ -72,7 +72,10 @@ public class Game extends Observable {
         if (dest != null) {
             caught = target.move(dest);
         }
-        // TODO 말이 들어왔는지 평가 필요,
+
+        if(dest.num == -1){
+            current.arrivePiece(target);
+        }
 
         updateBoardView();
 
