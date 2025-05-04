@@ -64,32 +64,15 @@ public class Game extends Observable {
             target = current.getPieces().get(0);
         }
 
-        BoardSlot[] candidates = target.getMoveCandidates(moveValue, 4);
         BoardSlot candidate = target.getMoveCandidate(moveValue, 4);
         BoardSlot dest = candidate;
-
-//        // --- 경로 선택 처리 추가 ---
-//        if (candidates[0] != null && candidates[1] != null) {
-//            // 선택 가능 (2개 다 있음)
-//            String[] options = { "왼쪽 경로", "오른쪽 경로" };
-//            int choice = OptionPanel.select("어느 경로로 이동하시겠습니까?", options);
-//            dest = candidates[choice];
-//        }
-//        else if (candidates[0] != null) {
-//            // 왼쪽만 있음 → 자동 선택
-//            dest = candidates[0];
-//        }
-//        else if (candidates[1] != null) {
-//            // 오른쪽만 있음 → 자동 선택
-//            dest = candidates[1];
-//        }
 
         // --- 선택한 dest로 이동 ---
         boolean caught = false;
         if (dest != null) {
             caught = target.move(dest);
         }
-        // TODO 말이 들어왔는지 평가 필요
+        // TODO 말이 들어왔는지 평가 필요,
 
         updateBoardView();
 

@@ -21,6 +21,10 @@ public class Piece extends Entity {
                 candidate = candidate.getNext()[(polygon / 2) - 1];
                 for(int step = 0; step < steps - 1; step++){
                     candidate = candidate.getNext()[0];
+                    if(candidate.num == 0) {
+                        candidate = new BoardSlot(-1, polygon);
+                        break;
+                    }
                 }
                 return candidate;
             }
@@ -32,55 +36,12 @@ public class Piece extends Entity {
             else{
                 candidate = candidate.getNext()[0];
             }
+            if(candidate.num == 0) {
+                candidate = new BoardSlot(-1, polygon);
+                break;
+            }
         }
         return candidate;
-    }
-
-    public BoardSlot[] getMoveCandidates(int steps, int polygon) {
-        int side = 5; int diagnal = 2;
-        BoardSlot[] candidates = new BoardSlot[(polygon/2) + 1];
-        BoardSlot candidate = new BoardSlot(0, polygon);
-        BoardSlot currentSlot = slot;
-        int prevSlotNum = 0;
-        int nDiagnal = 0;
-        if (steps == -1) {
-            for(int i = 0; i < (polygon/2) + 1; i++){
-                if(currentSlot.getNext()[i] != null) candidates[i] = new BoardSlot(currentSlot.getPrev()[i]);
-            }
-            return candidates;
-        }
-        for(int i = 0; i < (polygon/2) + 1; i++){
-            if(currentSlot.getNext()[i] != null) candidates[i] = new BoardSlot(currentSlot.getNext()[i]);
-        }
-        if (candidates[0].num == 0){
-            candidates[0] = new BoardSlot(-1, polygon);
-            candidates[1] = new BoardSlot(-1, polygon);
-            return candidates;
-        }
-        prevSlotNum = currentSlot.num;
-        int i = 0;
-        while(candidates[i] != null)
-        {
-            for (int j = 0; j < steps - 1; j++) {
-                if (candidates[i].num == 0){
-                    candidates[i] = new BoardSlot(-1, polygon);
-                    break;
-                }
-                if (candidates[i].num == side * polygon) {
-                    nDiagnal = (prevSlotNum - side*polygon) / diagnal - 1;
-                    if (polygon % 2 != 0 && nDiagnal == polygon / 2 + 1) {
-                        nDiagnal -= 1;
-                    }
-                    prevSlotNum = candidates[i].num;
-                    candidates[i] = candidates[i].getNext()[nDiagnal];
-                } else {
-                    prevSlotNum = candidates[i].num;
-                    candidates[i] = candidates[i].getNext()[0];
-                }
-            }
-            i++;
-        }
-        return candidates;
     }
 
     public boolean move(BoardSlot dest) {
