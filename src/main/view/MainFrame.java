@@ -1,10 +1,9 @@
-package view;
+package main.view;
 
-import controller.GameController;
-import model.GameConfig;
+import main.controller.GameController;
+import main.model.GameConfig;
 import javax.swing.*;
 import java.awt.*;
-import javax.swing.border.LineBorder;
 
 public class MainFrame extends JFrame {
 

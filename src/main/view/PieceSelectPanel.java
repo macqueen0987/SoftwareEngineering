@@ -1,11 +1,9 @@
-package view;
+package main.view;
 
-import model.GameConfig;
+import main.model.GameConfig;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 팀별 “남은 말” 목록을 버튼/아이콘으로 보여주는 패널

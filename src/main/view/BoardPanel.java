@@ -1,4 +1,4 @@
-package view;
+package main.view;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,7 +83,7 @@ public class BoardPanel extends JPanel {
         g.setFont(new Font("SansSerif", Font.PLAIN, 10));
 
         // 강조할 슬롯 번호 목록 (꼭짓점 및 중앙)
-        Set<Integer> specialSlots = Set.of(0, 5, 10, 15, 22);
+        Set<Integer> specialSlots = Set.of(0, 5, 10, 15, 20);
 
         for (int i = 0; i < BoardGeometry.SLOT.length; i++) {
             Point p = BoardGeometry.SLOT[i];

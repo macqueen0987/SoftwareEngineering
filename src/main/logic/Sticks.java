@@ -1,4 +1,4 @@
-package logic;
+package main.logic;
 
 public class Sticks {
 
@@ -38,3 +38,4 @@ public class Sticks {
         return backdo;
     }
 }
+

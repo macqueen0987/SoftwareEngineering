@@ -1,13 +1,22 @@
-package logic;
+package main.logic;
 
 public class BoardSlot extends Entity {
-    private BoardSlot[] next = new BoardSlot[2];
-    private BoardSlot[] prev = new BoardSlot[2];
+    private BoardSlot[] next;
+    private BoardSlot[] prev;
     private Piece piece;
     public final int num;
 
-    public BoardSlot(int num) {
+    public BoardSlot(int num, int polygon) {
         this.num = num;
+        this.next = new BoardSlot[(polygon/2) + 1];
+        this.prev = new BoardSlot[(polygon/2) + 1];
+    }
+
+    public BoardSlot(BoardSlot boardSlot){
+        this.next = boardSlot.getNext();
+        this.prev = boardSlot.getPrev();
+        this.piece = boardSlot.getPiece();
+        this.num = boardSlot.num;
     }
 
     public void setNext(int index, BoardSlot slot) { next[index] = slot; }

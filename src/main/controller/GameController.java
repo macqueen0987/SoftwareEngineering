@@ -1,8 +1,10 @@
-package controller;
+package main.controller;
 
-import logic.Game;
-import logic.Player;
-import view.*;
+import main.logic.Game;
+import main.logic.Player;
+import main.view.BoardPanel;
+import main.view.StatusPanel;
+import main.view.StickPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -32,7 +34,7 @@ public class GameController {
             @Override
             public void actionPerformed(ActionEvent e) {
                 onThrowSticks();
-            }
+             }
         });
 
         // 초기 턴 상태 업데이트

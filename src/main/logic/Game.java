@@ -1,15 +1,16 @@
-package logic;
+package main.logic;
 
-import view.BoardPanel;
-import view.OptionPanel;
-import view.StickPanel;
+import main.view.BoardPanel;
+import main.view.OptionPanel;
+import main.view.StickPanel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
-public class Game {
+public class Game extends Observable {
 
-    private Board board = new Board();
+    private Board board = new Board(4);
     private Sticks sticks = new Sticks();
     private List<Player> players = new ArrayList<>();
     private int turn = 0;
@@ -38,6 +39,16 @@ public class Game {
         stickPanel.setFaces(sticks.getFaces(), sticks.isBackdo());
     }
 
+    public void chooseSticks(){
+        int result = 0;
+        //TODO 윷 선택 과정
+        pendingThrows.add(result);
+        System.out.println("Throw result: " + result);
+
+        // 윷 던진 결과를 StickPanel에 반영
+        stickPanel.setFaces(sticks.getFaces(), sticks.isBackdo());
+    }
+
     /** 말 이동 */
     public void movePiece() {
         Player current = players.get(turn);
@@ -53,30 +64,32 @@ public class Game {
             target = current.getPieces().get(0);
         }
 
-        BoardSlot[] candidates = target.getMoveCandidates(moveValue);
-        BoardSlot dest = null;
+        BoardSlot[] candidates = target.getMoveCandidates(moveValue, 4);
+        BoardSlot candidate = target.getMoveCandidate(moveValue, 4);
+        BoardSlot dest = candidate;
 
-        // --- 경로 선택 처리 추가 ---
-        if (candidates[0] != null && candidates[1] != null) {
-            // 선택 가능 (2개 다 있음)
-            String[] options = { "왼쪽 경로", "오른쪽 경로" };
-            int choice = OptionPanel.select("어느 경로로 이동하시겠습니까?", options);
-            dest = candidates[choice];
-        }
-        else if (candidates[0] != null) {
-            // 왼쪽만 있음 → 자동 선택
-            dest = candidates[0];
-        }
-        else if (candidates[1] != null) {
-            // 오른쪽만 있음 → 자동 선택
-            dest = candidates[1];
-        }
+//        // --- 경로 선택 처리 추가 ---
+//        if (candidates[0] != null && candidates[1] != null) {
+//            // 선택 가능 (2개 다 있음)
+//            String[] options = { "왼쪽 경로", "오른쪽 경로" };
+//            int choice = OptionPanel.select("어느 경로로 이동하시겠습니까?", options);
+//            dest = candidates[choice];
+//        }
+//        else if (candidates[0] != null) {
+//            // 왼쪽만 있음 → 자동 선택
+//            dest = candidates[0];
+//        }
+//        else if (candidates[1] != null) {
+//            // 오른쪽만 있음 → 자동 선택
+//            dest = candidates[1];
+//        }
 
         // --- 선택한 dest로 이동 ---
         boolean caught = false;
         if (dest != null) {
             caught = target.move(dest);
         }
+        // TODO 말이 들어왔는지 평가 필요
 
         updateBoardView();
 
