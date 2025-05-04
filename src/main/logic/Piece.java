@@ -16,8 +16,8 @@ public class Piece extends Entity {
             candidate = slot.getPrev()[0];
             return candidate;
         }
-        if(candidate.num % 5 == 0) {
-            if (candidate.num == polygon * 5 || (candidate.num / 5 <= (polygon + 1) / 2 && candidate.num / 5 > 0)){
+        if(candidate.num % 5 == 0) {     // 대각선 및 중앙 슬롯의 경우의 이동 처리
+            if (candidate.num == polygon * 5 || (candidate.num / 5 <= (polygon + 1) / 2 && candidate.num / 5 > 0)){ 
                 candidate = candidate.getNext()[(polygon / 2) - 1];
                 for(int step = 0; step < steps - 1; step++){
                     candidate = candidate.getNext()[0];
