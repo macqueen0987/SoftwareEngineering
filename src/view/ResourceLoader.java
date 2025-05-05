@@ -10,7 +10,7 @@ import java.awt.Image;
 public final class ResourceLoader {
 
     private static final Map<String, ImageIcon> CACHE = new HashMap<>();
-    private static final String DIR = "/img/";      // 클래스패스 기준 경로
+    private static final String DIR = "/resources/";      // 클래스패스 기준 경로
 
     private static ImageIcon load(String file) {
         return CACHE.computeIfAbsent(file, f -> {

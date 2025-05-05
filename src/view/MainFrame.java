@@ -15,7 +15,7 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
         // [1] 보드 패널 (중앙)
-        BoardPanel boardPanel = new BoardPanel();
+        BoardPanel boardPanel = new BoardPanel(cfg.boardShape());
         add(boardPanel, BorderLayout.CENTER);
 
         // [2] 오른쪽 패널 구성 (StickPanel + 버튼 + 말 선택 패널)
