@@ -19,7 +19,12 @@ public class MainFrame extends JFrame {
         System.out.println("팀당 말 개수: " + cfg.piecePerTeam());
 
         /* 1) 왼쪽 : 보드 */
-        BoardPanel board = new BoardPanel();
+        JPanel board;
+        if (cfg.boardShape().equals("육각")) {
+            board = new HexBoardPanel();
+        } else {
+            board = new BoardPanel();
+        }
         add(board, BorderLayout.CENTER);
 
         // StickPanel 생성
