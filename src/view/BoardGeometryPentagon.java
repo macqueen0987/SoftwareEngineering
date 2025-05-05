@@ -103,7 +103,7 @@ public final class BoardGeometryPentagon {
     }
 
     public static Point offset(int slot, int order) {
-        Point p = T_SLOT[slot];
+        Point p = SLOT[slot];
         int off = 10;
 
         return switch (order) {
