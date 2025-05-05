@@ -1,27 +1,27 @@
 package main.logic;
 
-import main.view.BoardPanel;
-import main.view.OptionPanel;
-import main.view.StickPanel;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Observable;
+import java.util.concurrent.SubmissionPublisher;
 
-public class Game extends Observable {
+public class Game{
+    private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
+    private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
 
-    private Board board = new Board(4);
+    //public record StructPiece(int slot, String color, int order){}
+
+    private Board board;
     private Sticks sticks = new Sticks();
     private List<Player> players = new ArrayList<>();
     private int turn = 0;
-    private BoardPanel boardPanel;
-    private StickPanel stickPanel;
+    private int polygon = 4;
 
     private List<Integer> pendingThrows = new ArrayList<>();
 
-    public Game(BoardPanel boardPanel, StickPanel stickPanel) {
-        this.boardPanel = boardPanel;
-        this.stickPanel = stickPanel;
+    public Game(int polygon) {
+        this.polygon = polygon;
+        board = new Board(polygon);
 
         players.add(new Player("Player1", "RED", board));
         players.add(new Player("Player2", "BLUE", board));
@@ -36,7 +36,9 @@ public class Game extends Observable {
         System.out.println("Throw result: " + result);
 
         // 윷 던진 결과를 StickPanel에 반영
-        stickPanel.setFaces(sticks.getFaces(), sticks.isBackdo());
+        boolean[] arr = Arrays.copyOf(sticks.getFaces(), 5);
+        arr[4] = sticks.isBackdo();
+        sticksPublisher.submit(arr);
     }
 
     public void chooseSticks(){
@@ -46,11 +48,19 @@ public class Game extends Observable {
         System.out.println("Throw result: " + result);
 
         // 윷 던진 결과를 StickPanel에 반영
-        stickPanel.setFaces(sticks.getFaces(), sticks.isBackdo());
+        boolean[] arr = Arrays.copyOf(sticks.getFaces(), 5);
+        arr[4] = sticks.isBackdo();
+        sticksPublisher.submit(arr);
+    }
+
+    /**말 선택*/
+    public Piece selectPiece(){
+        return null;
+
     }
 
     /** 말 이동 */
-    public void movePiece() {
+    public void movePiece(Piece p) {
         Player current = players.get(turn);
         if (pendingThrows.isEmpty()) return;
 
@@ -64,7 +74,7 @@ public class Game extends Observable {
             target = current.getPieces().get(0);
         }
 
-        BoardSlot candidate = target.getMoveCandidate(moveValue, 4);
+        BoardSlot candidate = target.getMoveCandidate(moveValue, polygon);
         BoardSlot dest = candidate;
 
         // --- 선택한 dest로 이동 ---
@@ -86,18 +96,26 @@ public class Game extends Observable {
     }
 
     private void updateBoardView() {
-        List<BoardPanel.Piece> uiPieces = new ArrayList<>();
-        for (int i = 0; i < 29; i++) {
+        List<StructPiece> uiPieces = new ArrayList<>();
+        for (int i = 0; i < polygon * 7 + 1; i++) {
             BoardSlot slot = board.getSlot(i);
             Piece piece = slot.getPiece();
             if (piece != null) {
-                uiPieces.add(new BoardPanel.Piece(i, piece.getOwner().getColor(), 0));
+                uiPieces.add(new StructPiece(i, piece.getOwner().getColor(), 0));
             }
         }
-        boardPanel.setPieces(uiPieces);
+        boardPublisher.submit(uiPieces);
     }
 
     public Player getCurrentPlayer() {
         return players.get(turn);
+    }
+
+    public SubmissionPublisher<List<StructPiece>> getBoardPublisher() {
+        return boardPublisher;
+    }
+
+    public SubmissionPublisher<boolean[]> getSticksPublisher() {
+        return sticksPublisher;
     }
 }

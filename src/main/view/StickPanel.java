@@ -2,11 +2,39 @@ package main.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Flow;
 
-public class StickPanel extends JPanel {
+public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
 
     private boolean[] faces = {true, true, true, true};
     private boolean   backdo = false;
+    private Flow.Subscription subscription;
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        this.subscription = subscription;
+        this.subscription.request(1);
+    }
+
+    @Override
+    public void onNext(boolean[] item) {
+        setFaces(item);
+        subscription.request(1);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        System.out.println("StickPanel error: " + throwable);
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println("StickPanel updates complete");
+    }
 
     public StickPanel() {
         setPreferredSize(new Dimension(540, 170));   // 기존 크기 그대로
@@ -17,6 +45,12 @@ public class StickPanel extends JPanel {
         if (arr == null || arr.length != 4) return;
         faces  = arr.clone();
         backdo = isBackdo;
+        repaint();
+    }
+
+    public void setFaces(boolean[] arr){
+        faces = Arrays.copyOfRange(arr,0,4);
+        backdo = arr[4];
         repaint();
     }
 
