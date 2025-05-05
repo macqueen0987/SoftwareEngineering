@@ -22,6 +22,7 @@ public class MainFrame extends JFrame {
         StickPanel stickPanel = new StickPanel();
         JButton throwButton = new JButton("던지기");
         throwButton.setFont(new Font("SansSerif", Font.BOLD, 18));
+        throwButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg);
 
