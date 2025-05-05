@@ -1,4 +1,4 @@
-package view;
+package main.view;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -20,10 +20,10 @@ public final class HexBoardGeometry {
         // 1-1) 6개 꼭짓점 구하기 (0=왼쪽, 1=좌하, 2=우하, 3=오른쪽, 4=우상, 5=좌상)
         Point[] verts = new Point[6];
         for (int i = 0; i < 6; i++) {
-            double angle = Math.toRadians(180 + i*60);
+            double angle = Math.toRadians((300 + i*60));
             verts[i] = new Point(
                     (int)(cx + R * Math.cos(angle)),
-                    (int)(cy + R * Math.sin(angle))
+                    (int)(cy - R * Math.sin(angle))
             );
         }
         // 1-2) 외곽 슬롯 30칸: 각 변마다 5칸 (꼭짓점 포함)
@@ -40,28 +40,40 @@ public final class HexBoardGeometry {
         }
         // idx == 30
 
+        // 1-4) 중심 슬롯 (30번)
+        RAW[idx++] = new Point(cx, cy);
+
         // 1-3) 내부 슬롯 12칸: 중심→꼭짓점 방향으로 2칸 (총 6방향×2)
         for (int i = 0; i < 6; i++) {
-            Point v = verts[i];
-            for (int j = 1; j <= 2; j++) {
-                double t = j / 3.0;
-                RAW[idx++] = new Point(
-                        (int)(cx * (1 - t) + v.x * t),
-                        (int)(cy * (1 - t) + v.y * t)
-                );
+            Point v = verts[(i + 1) % 6];
+            if(i < 3){
+                for (int j = 2; j >= 1; j--) {
+                    double t = j / 3.0;
+                    RAW[idx++] = new Point(
+                           (int)(cx * (1 - t) + v.x * t),
+                           (int)(cy * (1 - t) + v.y * t)
+                    );
+                }
+            }
+            else{
+                for (int j = 1; j <= 2; j++) {
+                    double t = j / 3.0;
+                    RAW[idx++] = new Point(
+                            (int)(cx * (1 - t) + v.x * t),
+                            (int)(cy * (1 - t) + v.y * t)
+                    );
+                }
             }
         }
         // idx == 42
-
-        // 1-4) 중심 슬롯 (42번)
-        RAW[idx++] = new Point(cx, cy);
 
         if (idx != SLOT_COUNT)
             throw new IllegalStateException("슬롯 개수 불일치: " + idx);
 
         // 2) RAW → SLOT 복사
-        for (int i = 0; i < SLOT_COUNT; i++)
+        for (int i = 0; i < SLOT_COUNT; i++){
             SLOT[i] = new Point(RAW[i]);
+        }
 
         // 3) EDGE 생성 (동적 리스트 → 배열)
         List<int[]> edges = new ArrayList<>();
@@ -72,18 +84,19 @@ public final class HexBoardGeometry {
 
         // 3-2) 가지 연결 (42→30→31→0, 42→32→33→5, …)
         // internal1 = 30 + i*2, internal2 = internal1+1, vertex = i*5
-        for (int i = 0; i < 6; i++) {
+        for (int i = 1; i <= 6; i++) {
             int internal1 = 30 + i * 2;
-            int internal2 = internal1 + 1;
-            int vertex    = i * 5;
-            edges.add(new int[]{42, internal1});
+            int internal2 = internal1 - 1;
+            int vertex    = (i * 5) % 30;
+            edges.add(new int[]{30, internal1});
             edges.add(new int[]{internal1, internal2});
             edges.add(new int[]{internal2, vertex});
         }
 
         EDGE = new int[edges.size()][2];
-        for (int i = 0; i < edges.size(); i++)
+        for (int i = 0; i < edges.size(); i++){
             EDGE[i] = edges.get(i);
+        }
     }
 
     /** 패널 크기에 맞춰 SLOT 좌표 스케일 & 중앙 정렬 */
