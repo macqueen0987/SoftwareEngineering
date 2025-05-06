@@ -1,4 +1,4 @@
-package model;
+package main.model;
 
 /** 게임 시작 전에 선택한 설정값을 한 번에 담아 두기 위한 DTO */
 public record GameConfig(

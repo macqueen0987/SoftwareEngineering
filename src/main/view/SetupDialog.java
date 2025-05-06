@@ -1,6 +1,6 @@
-package view;
+package main.view;
 
-import model.GameConfig;
+import main.model.GameConfig;
 
 import javax.swing.*;
 import java.awt.*;

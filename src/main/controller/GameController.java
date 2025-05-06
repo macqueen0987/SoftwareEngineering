@@ -1,14 +1,17 @@
-package controller;
+package main.controller;
 
-import logic.Game;
-import logic.Player;
-import view.*;
+import main.logic.Game;
+import main.logic.Piece;
+import main.logic.Player;
+import main.view.BoardPanel;
+import main.view.StatusPanel;
+import main.view.StickPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class GameController {
+public class GameController{
 
     private final Game game;
     private final BoardPanel boardPanel;
@@ -17,22 +20,31 @@ public class GameController {
     private final JButton throwButton;
 
     public GameController(BoardPanel boardPanel, StickPanel stickPanel,
-                          StatusPanel statusPanel, JButton throwButton) {
+                          StatusPanel statusPanel, JButton throwButton, String boardShape) {
 
         this.boardPanel = boardPanel;
         this.stickPanel = stickPanel;
         this.statusPanel = statusPanel;
         this.throwButton = throwButton;
+        int polygon = switch (boardShape) {
+            case "사각" -> 4;
+            case "오각" -> 5;
+            case "육각" -> 6;
+            default -> 4;
+        };
 
         // Game 초기화 (UI 연동)
-        this.game = new Game(boardPanel, stickPanel);
+        this.game = new Game(polygon);
+
+        game.getBoardPublisher().subscribe(boardPanel);
+        game.getSticksPublisher().subscribe(stickPanel);
 
         // 던지기 버튼과 이벤트 연결
         throwButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 onThrowSticks();
-            }
+             }
         });
 
         // 초기 턴 상태 업데이트
@@ -44,8 +56,11 @@ public class GameController {
         // 윷 던지기
         game.throwSticks();
 
-        // 말 이동 (던진 결과 바로 처리)
-        game.movePiece();
+        // 말 선택
+        Piece p = game.selectPiece();
+
+        // 말 이동
+        game.movePiece(p);
 
         // 턴 상태 갱신
         updateStatus();
