@@ -1,6 +1,5 @@
 package main.view;
 
-import main.logic.Game;
 import main.logic.StructPiece;
 
 import javax.swing.*;
@@ -33,6 +32,15 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
     @Override
     public void onComplete() {
         System.out.println("BoardPanel updates complete");
+    }
+
+    private SlotClickListener slotClickListener;
+    public interface SlotClickListener{
+        void onSlotClick(int idx);
+    }
+
+    public void setSlotClickListener(SlotClickListener listener) {
+        this.slotClickListener = listener;
     }
 
     private String boardShape = "사각";
@@ -89,7 +97,13 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
                 } else {
                     idx = BoardGeometry.slotAt(e.getX(), e.getY());
                 }
-                if (idx != -1) { highlight = idx; repaint(); }
+                if (idx != -1) {
+                    highlight = idx;
+                    repaint();
+                    if (slotClickListener != null) {
+                        slotClickListener.onSlotClick(idx);
+                    }
+                }
             }
         });
     }

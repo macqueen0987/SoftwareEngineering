@@ -13,11 +13,12 @@ public class OptionPanel {
     public static int select(String message, String[] options) {
         return JOptionPane.showOptionDialog(null,
                 message,
-                "경로 선택",
+                "윷 선택",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 options,
                 options[0]);
+
     }
 }

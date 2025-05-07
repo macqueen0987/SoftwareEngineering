@@ -18,10 +18,8 @@ public class PieceSelectPanel extends JPanel {
     private List<List<JLabel>> pieceLabels = new ArrayList<>();
     private final String[] teamColors;
 
-
     public PieceSelectPanel(GameConfig cfg, String[] colors) {
         this.teamColors = colors;
-
         int teams  = cfg.teamCount();
         int pieces = cfg.piecePerTeam();
 
@@ -44,10 +42,9 @@ public class PieceSelectPanel extends JPanel {
                 JLabel lbl = new JLabel(icon);
                 lbl.setHorizontalAlignment(JLabel.CENTER);
                 grid.add(lbl);
-                teamPieces.add(lbl);  // 이 줄 추가
+                teamPieces.add(lbl);
             }
-            pieceLabels.add(teamPieces);  // 이 줄 추가
-
+            pieceLabels.add(teamPieces);
         }
 
         add(grid);

@@ -50,5 +50,4 @@ public class Player {
     public int getRemainingPieceCount() {
         return maxPieceCount - pieces.size();
     }
-
 }
