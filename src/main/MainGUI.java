@@ -1,10 +1,11 @@
-package main.view;
+package main;
 
 import main.model.GameConfig;
+import main.view.MainFrame;
+import main.view.SetupDialog;
 
 import javax.swing.SwingUtilities;
 
-/** GUI 실행 진입점 (임시로 view 패키지에 둠) */
 public class MainGUI {
     public static void main(String[] args){
         SwingUtilities.invokeLater(() -> {
