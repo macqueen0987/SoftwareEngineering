@@ -12,13 +12,6 @@ public class BoardSlot extends Entity {
         this.prev = new BoardSlot[(polygon/2) + 1];
     }
 
-    public BoardSlot(BoardSlot boardSlot){
-        this.next = boardSlot.getNext();
-        this.prev = boardSlot.getPrev();
-        this.piece = boardSlot.getPiece();
-        this.num = boardSlot.num;
-    }
-
     public void setNext(int index, BoardSlot slot) { next[index] = slot; }
     public void setPrev(int index, BoardSlot slot) { prev[index] = slot; }
     public BoardSlot[] getNext() { return next; }

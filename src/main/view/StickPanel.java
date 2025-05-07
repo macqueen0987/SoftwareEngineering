@@ -54,6 +54,16 @@ public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
         repaint();
     }
 
+    public int getResult(){
+        int result = 0;
+        if(backdo) return -1;
+        for(int i = 0; i < 4; i ++){
+            if(faces[i]) result++;
+        }
+        if(result == 0) return 5;
+        return result;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

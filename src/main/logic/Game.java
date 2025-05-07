@@ -1,5 +1,6 @@
 package main.logic;
 
+import javax.lang.model.type.NullType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,14 +10,12 @@ public class Game{
     private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
     private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
 
-
-    //public record StructPiece(int slot, String color, int order){}
-
     private final Board board;
     private Sticks sticks = new Sticks();
     private List<Player> players = new ArrayList<>();
     private int turn = 0;
     private int polygon = 4;
+    boolean caught = false;
 
     private List<Integer> pendingThrows = new ArrayList<>();
 
@@ -47,11 +46,18 @@ public class Game{
         return players.toArray(new Player[0]);
     }
 
+    public List<Integer> getPendingThrows() { return pendingThrows; }
+
     /** 윷 던지기 + StickPanel 갱신 */
     public void throwSticks() {
         int result = sticks.throwSticks();
         pendingThrows.add(result);
         System.out.println("Throw result: " + result);
+        while(result == 4 || result == 5){
+            result = sticks.throwSticks();
+            pendingThrows.add(result);
+            System.out.println("Throw result: " + result);
+        }
 
         // 윷 던진 결과를 StickPanel에 반영
         boolean[] arr = Arrays.copyOf(sticks.getFaces(), 5);
@@ -72,35 +78,30 @@ public class Game{
     }
 
     /**말 선택*/
-    public Piece selectPiece(){
-        return null;
+    public Piece selectPiece(int slotIdx){
+        if(slotIdx == -1) return null;
+        else return board.getSlot(slotIdx).getPiece();
     }
 
     /** 말 이동 */
-    public void movePiece(Piece p) {
+    public void movePiece(Piece p, int moveValue) {
         Player current = players.get(turn);
-        if (pendingThrows.isEmpty()) return;
-
-        int moveValue = pendingThrows.remove(0);
-        boolean bonusTurn = (moveValue == 4 || moveValue == 5);
-
         Piece target;
-        if (current.getPieces().isEmpty()) {
+        if(p != null && p.getOwner() == current) target = p;
+        else if (current.getPieces().isEmpty()) {
             target = current.createPiece();
             target.setSlot(board.getStart());
         } else {
-            target = current.getPieces().get(0); // TODO: 선택 UI 추가
+            target = current.getPieces().get(0);
         }
 
         BoardSlot candidate = target.getMoveCandidate(moveValue, polygon);
         BoardSlot dest = candidate;
 
         // --- 선택한 dest로 이동 ---
-        boolean caught = false;
         if (dest != null) {
             caught = target.move(dest);
         }
-
         if(dest.num == -1){
             current.arrivePiece(target);
         }
@@ -108,8 +109,9 @@ public class Game{
         updateBoardView();
 
         // 윷/모 또는 잡았을 때 → 추가 턴 (턴 넘기지 않음)
-        if (pendingThrows.isEmpty() && !bonusTurn && !caught) {
+        if (!caught && pendingThrows.isEmpty()) {
             turn = (turn + 1) % players.size();
+            caught = false;
         }
     }
 

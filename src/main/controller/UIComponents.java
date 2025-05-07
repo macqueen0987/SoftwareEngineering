@@ -1,6 +1,7 @@
 package main.controller;
 
 import main.view.BoardPanel;
+import main.view.PieceSelectPanel;
 import main.view.StatusPanel;
 import main.view.StickPanel;
 

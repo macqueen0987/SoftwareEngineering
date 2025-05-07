@@ -7,6 +7,7 @@ import main.model.GameConfig;
 import main.view.*;
 
 import javax.swing.*;
+import java.util.List;
 
 public class GameController {
 
@@ -14,6 +15,11 @@ public class GameController {
     private final UIComponents ui;
     private final GameConfig config;
     private final JFrame mainFrame;
+    private int selectedSlot = -1;
+    private List<Integer> throwList;
+    private boolean waitForClick = false;
+    private int selectedIdx;
+    private int moveValue;
 
     public GameController(UIComponents ui, GameConfig config, String[] colors, JFrame mainFrame) {
         this.ui = ui;
@@ -34,16 +40,33 @@ public class GameController {
 
         ui.throwButton.addActionListener(e -> onThrowSticks());
         ui.newPieceButton.addActionListener(e -> onNewPiece());
+        ui.boardPanel.setSlotClickListener(this::onSelectSlot);
 
         updateStatus();
     }
 
     private void onThrowSticks() {
         game.throwSticks();
-        Piece p = game.selectPiece(); // <- 이거 리턴값 null 인데 어떻게 돌아가는지 모르겠네요
-        game.movePiece(p); // <- 심지어 여기서 p는 null 인데도 실행됨???? 이게 뭐임
-        updateStatus();
-        checkWinner();
+        throwList = game.getPendingThrows();
+        //while(!throwList.isEmpty()) selectThrow();
+        selectThrow();
+    }
+
+    private void selectThrow(){
+        String[] str = new String[10];
+        for(int i = 0; i < throwList.size(); i++) str[i] = String.valueOf(throwList.get(i));
+        int option =  Integer.parseInt((String) JOptionPane.showInputDialog(null,
+                "적용할 윷",
+                "윷 선택",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                str,
+                str[0]));
+        for(int i = 0; i < throwList.size(); i++) {
+            if(throwList.get(i) == option) this.selectedIdx = i ; //selectedIdx = i;
+        }
+        moveValue = throwList.remove(this.selectedIdx);
+        waitForClick = true;
     }
 
     private void onNewPiece() {
@@ -60,6 +83,20 @@ public class GameController {
 
         // 보드 UI 갱신
         game.updateBoardView();
+    }
+
+    private void onSelectSlot(int idx){
+        selectedSlot = idx;
+        if(waitForClick){
+            Piece p = game.selectPiece(selectedSlot);
+            game.movePiece(p, moveValue);
+            updateStatus();
+            checkWinner();
+            waitForClick = false;
+        }
+        if(!throwList.isEmpty()){
+            selectThrow();
+        }
     }
 
     private void updateStatus() {
