@@ -1,29 +1,33 @@
 package main.logic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
 
     private String name;
     private String color;
-    private Board board;
     private List<Piece> pieces = new ArrayList<>();
     private int score = 0;
 
-    public Player(String name, String color, Board board) {
+    private int maxPieceCount;
+
+    public Player(String name, String color, int maxPieceCount) {
         this.name = name;
         this.color = color;
-        this.board = board;
+        this.maxPieceCount = maxPieceCount;
     }
 
-    public Piece createPiece() {
-        Piece p = new Piece(this, board.getStart());
-        pieces.add(p);
-        return p;
+    public String getColor() {
+        return color;
     }
 
-    public void removePiece(Piece piece) {
-        pieces.remove(piece);
+    public List<Piece> getPieces() {
+        return pieces;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     public void arrivePiece(Piece piece){
@@ -31,7 +35,15 @@ public class Player {
         score += piece.getCount();
     }
 
-    public List<Piece> getPieces() { return pieces; }
-    public String getColor() { return color; }
-    public String getName() { return name; }
+    public Piece createPiece() {
+        if (pieces.size() >= maxPieceCount) return null;
+
+        Piece p = new Piece(this);
+        pieces.add(p);
+        return p;
+    }
+
+    public void removePiece(Piece piece) {
+        pieces.remove(piece);
+    }
 }
