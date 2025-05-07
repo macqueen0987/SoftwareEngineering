@@ -4,6 +4,8 @@ import main.model.GameConfig;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 팀별 “남은 말” 목록을 버튼/아이콘으로 보여주는 패널
@@ -13,8 +15,13 @@ public class PieceSelectPanel extends JPanel {
 
     /** 팀 색 순서 미리 정의 – 팀 수에 따라 앞에서부터 사용 */
     private final JButton newPieceBtn;
+    private List<List<JLabel>> pieceLabels = new ArrayList<>();
+    private final String[] teamColors;
+
 
     public PieceSelectPanel(GameConfig cfg, String[] colors) {
+        this.teamColors = colors;
+
         int teams  = cfg.teamCount();
         int pieces = cfg.piecePerTeam();
 
@@ -32,11 +39,15 @@ public class PieceSelectPanel extends JPanel {
             String color = colors[t];                          // red / blue / …
             ImageIcon icon = ResourceLoader.piece(color, 40);  // 40×40으로 축소
 
+            List<JLabel> teamPieces = new ArrayList<>();
             for (int p = 0; p < pieces; p++) {
                 JLabel lbl = new JLabel(icon);
                 lbl.setHorizontalAlignment(JLabel.CENTER);
                 grid.add(lbl);
+                teamPieces.add(lbl);  // 이 줄 추가
             }
+            pieceLabels.add(teamPieces);  // 이 줄 추가
+
         }
 
         add(grid);
@@ -56,4 +67,16 @@ public class PieceSelectPanel extends JPanel {
         return newPieceBtn;
     }
 
+    public void usePiece(String teamColor) {
+        for (int i = 0; i < pieceLabels.size(); i++) {
+            if (teamColors[i].equals(teamColor)) {  // ✅ 이제 GameConfig.COLORS 대신 this.colors 사용
+                List<JLabel> teamList = pieceLabels.get(i);
+                if (!teamList.isEmpty()) {
+                    JLabel lbl = teamList.remove(0);
+                    lbl.setVisible(false);
+                }
+                break;
+            }
+        }
+    }
 }

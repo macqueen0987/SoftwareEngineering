@@ -39,9 +39,20 @@ public class GameController {
     }
 
     private void onThrowSticks() {
+        Player current = game.getCurrentPlayer();
+
         game.throwSticks();
         Piece p = game.selectPiece(); // <- 이거 리턴값 null 인데 어떻게 돌아가는지 모르겠네요
+
+        int beforePieceCount = current.getRemainingPieceCount();
+
         game.movePiece(p); // <- 심지어 여기서 p는 null 인데도 실행됨???? 이게 뭐임
+
+        int afterPieceCount = current.getRemainingPieceCount();
+
+        if (afterPieceCount < beforePieceCount) {
+            ui.piecePanel.usePiece(current.getColor());
+        }
         updateStatus();
         checkWinner();
     }
@@ -49,6 +60,10 @@ public class GameController {
     private void onNewPiece() {
         Player current = game.getCurrentPlayer();
         Piece newPiece = current.createPiece();
+
+        if (newPiece != null) {
+            ui.piecePanel.usePiece(current.getColor());
+        }
 
         if (newPiece == null) {
             JOptionPane.showMessageDialog(null, "꺼낼 수 있는 말이 없습니다.");

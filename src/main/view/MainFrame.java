@@ -51,7 +51,7 @@ public class MainFrame extends JFrame {
 
         JButton newPieceButton = piecePanel.getNewPieceButton();
         // [★ 중요 ★] GameController 연결 (UI와 게임 연결)
-        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton, newPieceButton);
+        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton, newPieceButton, piecePanel);
         GameController controller = new GameController(ui, cfg, colors, this);
     }
 
