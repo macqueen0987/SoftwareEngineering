@@ -3,12 +3,13 @@ package main.view;
 import main.controller.GameController;
 import main.controller.UIComponents;
 import main.model.GameConfig;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
     public MainFrame(GameConfig cfg) {
-        String[] colors = {"red", "blue", "green", "yellow"}; // 팀 색상 일단 4개로 고정
+        String[] colors = {"red", "blue", "green", "yellow"}; // 팀 색상 고정
 
         setTitle("윷놀이 - 통합 레이아웃");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -20,9 +21,17 @@ public class MainFrame extends JFrame {
 
         // [2] 오른쪽 패널 구성 (StickPanel + 버튼 + 말 선택 패널)
         StickPanel stickPanel = new StickPanel();
-        JButton throwButton = new JButton("던지기");
-        throwButton.setFont(new Font("SansSerif", Font.BOLD, 18));
-        throwButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // 버튼 2개 생성
+        JButton throwButton1 = new JButton("지정 윷 던지기");
+        JButton throwButton2 = new JButton("랜덤 윷 던지기");
+        Font btnFont = new Font("SansSerif", Font.BOLD, 18);
+
+        // 버튼 2개를 담을 패널 (좌우 정렬)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false); // 배경 투명
+        buttonPanel.add(throwButton1);
+        buttonPanel.add(throwButton2);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg, colors);
 
@@ -34,7 +43,7 @@ public class MainFrame extends JFrame {
         rightPanel.add(Box.createVerticalStrut(20));
         rightPanel.add(stickPanel);
         rightPanel.add(Box.createVerticalStrut(30));
-        rightPanel.add(throwButton);
+        rightPanel.add(buttonPanel); // ← 수정된 버튼 패널 삽입
         rightPanel.add(Box.createVerticalStrut(30));
         rightPanel.add(piecePanel);
         rightPanel.add(Box.createVerticalGlue());
@@ -49,10 +58,12 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
+        // [★ 중요 ★] UI → GameController 연결
         JButton newPieceButton = piecePanel.getNewPieceButton();
-        // [★ 중요 ★] GameController 연결 (UI와 게임 연결)
-        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton, newPieceButton);
+        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton2, newPieceButton); // 랜덤 버튼 연결
         GameController controller = new GameController(ui, cfg, colors, this);
+
+        // throwButton1 리스너는 필요 시 controller에서 추가 연결
     }
 
     public void declareWinner(String color) {
@@ -76,7 +87,6 @@ public class MainFrame extends JFrame {
             SetupDialog setup = new SetupDialog(null);
             GameConfig config = setup.showDialog();
 
-            // 사용자가 취소한 경우
             if (config == null) {
                 System.exit(0);
                 return;
