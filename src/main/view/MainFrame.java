@@ -31,7 +31,6 @@ public class MainFrame extends JFrame {
         buttonPanel.setOpaque(false); // 배경 투명
         buttonPanel.add(throwButton1);
         buttonPanel.add(throwButton2);
-        //throwButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg, colors);
 
@@ -60,7 +59,7 @@ public class MainFrame extends JFrame {
 
         JButton newPieceButton = piecePanel.getNewPieceButton();
         // [★ 중요 ★] GameController 연결 (UI와 게임 연결)
-        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton2, newPieceButton);
+        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton2, newPieceButton, piecePanel);
         GameController controller = new GameController(ui, cfg, colors, this);
 
         // throwButton1 리스너는 필요 시 controller에서 추가 연결

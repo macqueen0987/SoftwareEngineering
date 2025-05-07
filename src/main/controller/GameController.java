@@ -15,7 +15,6 @@ public class GameController {
     private final UIComponents ui;
     private final GameConfig config;
     private final JFrame mainFrame;
-    private int selectedSlot = -1;
     private List<Integer> throwList;
     private boolean waitForClick = false;
     private int selectedIdx;
@@ -73,6 +72,10 @@ public class GameController {
         Player current = game.getCurrentPlayer();
         Piece newPiece = current.createPiece();
 
+        if (newPiece != null) {
+            ui.piecePanel.usePiece(current.getColor());
+        }
+
         if (newPiece == null) {
             JOptionPane.showMessageDialog(null, "꺼낼 수 있는 말이 없습니다.");
             return;
@@ -86,16 +89,15 @@ public class GameController {
     }
 
     private void onSelectSlot(int idx){
-        selectedSlot = idx;
         if(waitForClick){
-            Piece p = game.selectPiece(selectedSlot);
+            Piece p = game.selectPiece(idx);
             game.movePiece(p, moveValue);
             updateStatus();
             checkWinner();
             waitForClick = false;
-        }
-        if(!throwList.isEmpty()){
-            selectThrow();
+            if(!throwList.isEmpty()){
+                selectThrow();
+            }
         }
     }
 

@@ -14,13 +14,15 @@ public class UIComponents {
     public final StatusPanel statusPanel;
     public final JButton throwButton;
     public final JButton newPieceButton;
+    public final PieceSelectPanel piecePanel;
 
     public UIComponents(BoardPanel boardPanel, StickPanel stickPanel, StatusPanel statusPanel,
-                        JButton throwButton, JButton newPieceButton) {
+                        JButton throwButton, JButton newPieceButton, PieceSelectPanel pp) {
         this.boardPanel = boardPanel;
         this.stickPanel = stickPanel;
         this.statusPanel = statusPanel;
         this.throwButton = throwButton;
         this.newPieceButton = newPieceButton;
+        this.piecePanel = pp;
     }
 }
