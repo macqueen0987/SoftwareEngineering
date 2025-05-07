@@ -8,22 +8,28 @@ import java.awt.*;
  */
 public class StatusPanel extends JPanel {
 
-    private final JLabel turnLabel  = new JLabel("TURN: RED");
-    private final JLabel scoreLabel = new JLabel("Score 0 : 0");
+    private final JLabel turnLabel = new JLabel("TURN: RED");
+    private final JLabel[] scoreLabels;
+    private final String[] playerColors;
 
-    public StatusPanel() {
-        setLayout(new GridLayout(1, 2)); // 좌우로 2등분
+    public StatusPanel(int playerCount, String[] playerColors) {
+        this.playerColors = playerColors;
+        this.scoreLabels = new JLabel[playerCount];
+
+        setLayout(new GridLayout(1, playerCount + 1));
         setPreferredSize(new Dimension(650, 40));
-        setBackground(new Color(230, 223, 200)); // 밝은 베이지
+        setBackground(new Color(230, 223, 200));
 
         turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
         turnLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-
         add(turnLabel);
-        add(scoreLabel);
+
+        for (int i = 0; i < playerCount; i++) {
+            scoreLabels[i] = new JLabel(playerColors[i] + ": 0");
+            scoreLabels[i].setHorizontalAlignment(SwingConstants.CENTER);
+            scoreLabels[i].setFont(new Font("SansSerif", Font.BOLD, 14));
+            add(scoreLabels[i]);
+        }
     }
 
     /** 외부에서 턴 정보를 갱신할 수 있도록 제공 */
@@ -32,7 +38,10 @@ public class StatusPanel extends JPanel {
     }
 
     /** 외부에서 점수 정보를 갱신할 수 있도록 제공 */
-    public void setScore(int red, int blue) {
-        scoreLabel.setText("Score " + red + " : " + blue);
+    public void setScores(int[] scores) {
+        for (int i = 0; i < scores.length; i++) {
+            scoreLabels[i].setText(playerColors[i] + ": " + scores[i]);
+        }
     }
+
 }

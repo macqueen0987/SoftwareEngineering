@@ -5,10 +5,20 @@ public class Piece extends Entity {
     private BoardSlot slot;
     private int count = 1;
 
-    public Piece(Player owner, BoardSlot slot) {
+    public Piece(Player owner) {
         this.owner = owner;
+    }
+
+    public void setSlot(BoardSlot slot) {
         this.slot = slot;
     }
+
+    public BoardSlot getSlot() {
+        return slot;
+    }
+
+    public int getCount() { return count; }
+    public Player getOwner() { return owner; }
 
     public BoardSlot getMoveCandidate(int steps, int polygon){
         int midToStart = (polygon / 2) - 2;
@@ -92,8 +102,4 @@ public class Piece extends Entity {
         dest.addPiece(this);
         return false;
     }
-
-    public BoardSlot getSlot() { return slot; }
-    public int getCount() { return count; }
-    public Player getOwner() { return owner; }
 }

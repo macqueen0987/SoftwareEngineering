@@ -12,9 +12,9 @@ import java.awt.*;
 public class PieceSelectPanel extends JPanel {
 
     /** 팀 색 순서 미리 정의 – 팀 수에 따라 앞에서부터 사용 */
-    private static final String[] COLORS = {"red", "blue", "yellow", "green"};
+    private final JButton newPieceBtn;
 
-    public PieceSelectPanel(GameConfig cfg) {
+    public PieceSelectPanel(GameConfig cfg, String[] colors) {
         int teams  = cfg.teamCount();
         int pieces = cfg.piecePerTeam();
 
@@ -29,7 +29,7 @@ public class PieceSelectPanel extends JPanel {
         grid.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0)); // 그리드 아래 여백
 
         for (int t = 0; t < teams; t++) {
-            String color = COLORS[t];                          // red / blue / …
+            String color = colors[t];                          // red / blue / …
             ImageIcon icon = ResourceLoader.piece(color, 40);  // 40×40으로 축소
 
             for (int p = 0; p < pieces; p++) {
@@ -44,12 +44,16 @@ public class PieceSelectPanel extends JPanel {
         add(Box.createVerticalGlue());
 
         // 3) ‘새로운 말 꺼내기’ 버튼
-        JButton newPieceBtn = new JButton("새로운 말 꺼내기");
+        this.newPieceBtn = new JButton("새로운 말 꺼내기");
         newPieceBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         newPieceBtn.setMaximumSize(new Dimension(200, 60)); // 최대 크기 지정
         newPieceBtn.setFont(new Font("SansSerif", Font.BOLD, 16));
         newPieceBtn.setBackground(new Color(200, 220, 240));
-        add(newPieceBtn);
-
+        add(newPieceBtn); // <- 이거 버튼이 왜 여기서 생성되나요? 나머지 버튼들을 모두 MainFrame에서 생성하는데? 아무튼 작동 되니 그냥 둡니다.
     }
+
+    public JButton getNewPieceButton() {
+        return newPieceBtn;
+    }
+
 }

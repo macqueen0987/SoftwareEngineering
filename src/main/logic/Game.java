@@ -9,9 +9,10 @@ public class Game{
     private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
     private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
 
+
     //public record StructPiece(int slot, String color, int order){}
 
-    private Board board;
+    private final Board board;
     private Sticks sticks = new Sticks();
     private List<Player> players = new ArrayList<>();
     private int turn = 0;
@@ -19,14 +20,31 @@ public class Game{
 
     private List<Integer> pendingThrows = new ArrayList<>();
 
-    public Game(int polygon) {
+    public Game(int polygon, int teamCount, String[] colors, int piecePerTeam) {
         this.polygon = polygon;
         board = new Board(polygon);
 
-        players.add(new Player("Player1", "RED", board));
-        players.add(new Player("Player2", "BLUE", board));
+        // 플레이어 생성
+        for (int i = 0; i < teamCount; i++) {
+            String color = colors[i];
+            String name = "Player " + (i + 1);
+            Player player = new Player(name, color, piecePerTeam);
+            players.add(player);
+        }
 
         updateBoardView();
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public Player getPlayer(int index) {
+        return players.get(index);
+    }
+
+    public Player[] getPlayers() {
+        return players.toArray(new Player[0]);
     }
 
     /** 윷 던지기 + StickPanel 갱신 */
@@ -56,7 +74,6 @@ public class Game{
     /**말 선택*/
     public Piece selectPiece(){
         return null;
-
     }
 
     /** 말 이동 */
@@ -70,8 +87,9 @@ public class Game{
         Piece target;
         if (current.getPieces().isEmpty()) {
             target = current.createPiece();
+            target.setSlot(board.getStart());
         } else {
-            target = current.getPieces().get(0);
+            target = current.getPieces().get(0); // TODO: 선택 UI 추가
         }
 
         BoardSlot candidate = target.getMoveCandidate(moveValue, polygon);
@@ -95,7 +113,7 @@ public class Game{
         }
     }
 
-    private void updateBoardView() {
+    public void updateBoardView() {
         List<StructPiece> uiPieces = new ArrayList<>();
         for (int i = 0; i < polygon * 7 + 1; i++) {
             BoardSlot slot = board.getSlot(i);

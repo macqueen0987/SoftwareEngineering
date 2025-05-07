@@ -43,9 +43,9 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
     private Integer highlight = null;                 // 클릭된 슬롯
     // private List<Piece> pieces = List.of(); // 빈 리스트로 초기화, 임시 데이터 지우고 할 것
     private List<StructPiece> pieces = List.of(             // 임시 데이터
-            new StructPiece(0 , "RED"  ,0),
-            new StructPiece(0, "BLUE" ,0),
-            new StructPiece(0, "GREEN",1)
+//            new StructPiece(0 , "RED"  ,0),
+//            new StructPiece(0, "BLUE" ,0),
+//            new StructPiece(0, "GREEN",1)
     );
 
 
