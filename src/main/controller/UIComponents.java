@@ -12,16 +12,18 @@ public class UIComponents {
     public final BoardPanel boardPanel;
     public final StickPanel stickPanel;
     public final StatusPanel statusPanel;
-    public final JButton throwButton;
+    public final JButton forceThrowButton;
+    public final JButton randomThrowButton;
     public final JButton newPieceButton;
     public final PieceSelectPanel piecePanel;
 
     public UIComponents(BoardPanel boardPanel, StickPanel stickPanel, StatusPanel statusPanel,
-                        JButton throwButton, JButton newPieceButton, PieceSelectPanel pp) {
+                        JButton randomThrowButton, JButton forceThrowButton,JButton newPieceButton, PieceSelectPanel pp) {
         this.boardPanel = boardPanel;
         this.stickPanel = stickPanel;
         this.statusPanel = statusPanel;
-        this.throwButton = throwButton;
+        this.forceThrowButton = forceThrowButton;
+        this.randomThrowButton = randomThrowButton;
         this.newPieceButton = newPieceButton;
         this.piecePanel = pp;
     }

@@ -20,17 +20,17 @@ public class MainFrame extends JFrame {
 
         // [2] 오른쪽 패널 구성 (StickPanel + 버튼 + 말 선택 패널)
         StickPanel stickPanel = new StickPanel();
-        JButton throwButton1 = new JButton("지정 윷 던지기");
-        JButton throwButton2 = new JButton("랜덤 윷 던지기");
+        JButton forceThrowButton = new JButton("지정 윷 던지기");
+        JButton randomThrowButton = new JButton("랜덤 윷 던지기");
         Font btnFont = new Font("SansSerif", Font.BOLD, 18);
-        throwButton1.setFont(btnFont);
-        throwButton2.setFont(btnFont);
+        forceThrowButton.setFont(btnFont);
+        randomThrowButton.setFont(btnFont);
 
         // 버튼 2개를 담을 패널 (좌우 정렬)
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setOpaque(false); // 배경 투명
-        buttonPanel.add(throwButton1);
-        buttonPanel.add(throwButton2);
+        buttonPanel.add(forceThrowButton);
+        buttonPanel.add(randomThrowButton);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg, colors);
 
@@ -59,10 +59,10 @@ public class MainFrame extends JFrame {
 
         JButton newPieceButton = piecePanel.getNewPieceButton();
         // [★ 중요 ★] GameController 연결 (UI와 게임 연결)
-        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, throwButton2, newPieceButton, piecePanel);
+        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, randomThrowButton, forceThrowButton, newPieceButton, piecePanel);
         GameController controller = new GameController(ui, cfg, colors, this);
 
-        // throwButton1 리스너는 필요 시 controller에서 추가 연결
+        // forceThrowButton 리스너는 필요 시 controller에서 추가 연결
     }
 
     public void declareWinner(String color) {

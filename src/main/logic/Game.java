@@ -48,6 +48,10 @@ public class Game{
 
     public List<Integer> getPendingThrows() { return pendingThrows; }
 
+    public void addPendingThrow(int value) {
+        pendingThrows.add(value);
+    }
+
     /** 윷 던지기 + StickPanel 갱신 */
     public void throwSticks() {
         int result = sticks.throwSticks();
@@ -95,8 +99,11 @@ public class Game{
             target = current.getPieces().get(0);
         }
 
-        BoardSlot candidate = target.getMoveCandidate(moveValue, polygon);
-        BoardSlot dest = candidate;
+        for (Piece piece: current.getPieces()) {
+            System.out.println(piece.getCount());
+        }
+
+        BoardSlot dest = target.getMoveCandidate(moveValue, polygon);
 
         // --- 선택한 dest로 이동 ---
         if (dest != null) {
