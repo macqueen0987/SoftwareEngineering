@@ -80,7 +80,7 @@ public class Piece extends Entity {
     }
 
     public boolean move(BoardSlot dest) {
-        slot.removePiece();
+        slot.removePiece(this);
         slot = dest;
 
         if (dest.getPiece() != null) {
@@ -88,18 +88,19 @@ public class Piece extends Entity {
             if (other.owner == this.owner) {
                 // 같은 팀 → 합치기
                 other.count += this.count;
+                System.out.println("합쳐짐");
                 owner.removePiece(this);
                 return false;
             } else {
                 // 상대 팀 → 잡기
                 other.owner.removePiece(other);
-                dest.removePiece();
-                dest.addPiece(this);
+                dest.removePiece(this);
+                dest.setPiece(this);
                 return true;  // 여기서 true 반환
             }
         }
 
-        dest.addPiece(this);
+        dest.setPiece(this);
         return false;
     }
 }
