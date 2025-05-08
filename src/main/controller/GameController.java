@@ -38,7 +38,8 @@ public class GameController {
             default -> 4;
         };
 
-        this.game = new Game(polygon, config.teamCount(), colors, config.piecePerTeam());
+        PieceSelectPanel panel = new PieceSelectPanel(config, colors);
+        this.game = new Game(polygon, config.teamCount(), colors, config.piecePerTeam(), panel);
 
         game.getBoardPublisher().subscribe(ui.boardPanel);
         game.getSticksPublisher().subscribe(ui.stickPanel);
@@ -47,6 +48,10 @@ public class GameController {
         ui.newPieceButton.addActionListener(e -> onNewPiece());
         ui.boardPanel.setSlotClickListener(this::onSelectSlot);
         ui.forceThrowButton.addActionListener(e -> forceThrowSticks());
+        this.game.setGameEventListener(captured -> {
+            ui.piecePanel.returnPiece(captured.getOwner().getColor());
+        });
+
 
         updateStatus();
     }

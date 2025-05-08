@@ -1,14 +1,19 @@
 package main.logic;
 
+import main.view.PieceSelectPanel;
+
 import javax.lang.model.type.NullType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;
 
+
 public class Game{
     private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
     private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
+    private PieceSelectPanel piecePanel;
+    private GameEventListener listener;
 
     private final Board board;
     private Sticks sticks = new Sticks();
@@ -17,10 +22,14 @@ public class Game{
     private int polygon = 4;
     boolean caught = false;
 
+    public void setGameEventListener(GameEventListener listener) {
+        this.listener = listener;
+    }
     private List<Integer> pendingThrows = new ArrayList<>();
 
-    public Game(int polygon, int teamCount, String[] colors, int piecePerTeam) {
+    public Game(int polygon, int teamCount, String[] colors, int piecePerTeam, PieceSelectPanel piecePanel) {
         this.polygon = polygon;
+        this.piecePanel = piecePanel;
         board = new Board(polygon);
 
         // 플레이어 생성
@@ -90,7 +99,9 @@ public class Game{
     /** 말 이동 */
     public void movePiece(Piece p, int moveValue) {
         Player current = players.get(turn);
+        Piece captured = null; // 잡힌 말 저장 변수
         Piece target;
+
         if(p != null && p.getOwner() == current) target = p;
         else if (current.getPieces().isEmpty()) {
             target = current.createPiece();
@@ -107,10 +118,19 @@ public class Game{
 
         // --- 선택한 dest로 이동 ---
         if (dest != null) {
-            caught = target.move(dest);
+            captured = target.move(dest); // <- move()가 잡은 말 반환
+            if (captured != null) {
+                caught = true; // 잡았으면 턴 유지
+            }
         }
+
         if(dest.num == -1){
             current.arrivePiece(target);
+        }
+
+        // 잡힌 말이 있으면 UI에 다시 표시
+        if (captured != null && listener != null) {
+            listener.onPieceCaptured(captured);
         }
 
         updateBoardView();
@@ -118,8 +138,9 @@ public class Game{
         // 윷/모 또는 잡았을 때 → 추가 턴 (턴 넘기지 않음)
         if (!caught && pendingThrows.isEmpty()) {
             turn = (turn + 1) % players.size();
-            caught = false;
+
         }
+        caught = false;
     }
 
     public void updateBoardView() {

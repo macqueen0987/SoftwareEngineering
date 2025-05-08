@@ -66,14 +66,40 @@ public class PieceSelectPanel extends JPanel {
 
     public void usePiece(String teamColor) {
         for (int i = 0; i < pieceLabels.size(); i++) {
-            if (teamColors[i].equals(teamColor)) {  // ✅ 이제 GameConfig.COLORS 대신 this.colors 사용
+            if (teamColors[i].equals(teamColor)) {
                 List<JLabel> teamList = pieceLabels.get(i);
                 if (!teamList.isEmpty()) {
-                    JLabel lbl = teamList.remove(0);
+                    JLabel lbl = teamList.get(0);
                     lbl.setVisible(false);
                 }
                 break;
             }
         }
     }
+
+    public void returnPiece(String teamColor) {
+        System.out.println("returnPiece 호출됨: " + teamColor);
+        for (int i = 0; i < teamColors.length; i++) {
+            if (teamColors[i].equals(teamColor)) {
+                List<JLabel> teamList = pieceLabels.get(i);
+
+                for (JLabel lbl : teamList) {
+                    if (!lbl.isVisible()) {
+                        lbl.setVisible(true);
+                        revalidate();
+                        repaint();
+                        return;
+                    }
+                }
+
+                System.out.println("해당 팀에 숨겨진 말이 없습니다: " + teamColor);
+                return;
+            }
+        }
+
+        System.out.println("해당하는 teamColor를 찾지 못함: " + teamColor);
+    }
+
+
+
 }
