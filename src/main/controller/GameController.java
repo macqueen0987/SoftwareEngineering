@@ -123,6 +123,7 @@ public class GameController {
 
         // 보드 UI 갱신
         game.updateBoardView();
+        onSelectSlot(0); // 시작 슬롯을 선택한 것으로 간주
     }
 
     private void onSelectSlot(int idx){
