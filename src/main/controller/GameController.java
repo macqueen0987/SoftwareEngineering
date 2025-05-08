@@ -23,7 +23,6 @@ public class GameController {
     private final JFrame mainFrame;
     private List<Integer> throwList;
     private boolean waitForClick = false;
-    private int selectedIdx;
     private int moveValue;
 
     public GameController(UIComponents ui, GameConfig config, String[] colors, JFrame mainFrame) {
@@ -54,24 +53,13 @@ public class GameController {
     private void forceThrowSticks() {
         /* 내가 원하는 윷의 결과를 지정할 수 있도록 하는 메소드 */
         while (true) {
-            String input = JOptionPane.showInputDialog(null, "윷 결과를 입력하세요 (-1: 백도, 1~5: 도~모, 취소: 입력 종료)", "지정 윷 던지기", JOptionPane.PLAIN_MESSAGE);
+            String[] options = {"백도", "도", "개", "걸", "윷", "모"};
+            int result = OptionPanel.select("윷 결과를 선택하세요", options);
 
-            if (input == null) {
-                // 취소 또는 닫기 누르면 종료
-                break;
-            }
+            if (result == -1) break; // 취소한 경우
 
-            try {
-                int result = Integer.parseInt(input);
-                if (result < -1 || result > 5) {
-                    JOptionPane.showMessageDialog(null, "잘못된 입력입니다. -1부터 5 사이 숫자를 입력하세요.");
-                    continue;
-                }
-                game.addPendingThrow(result);
-
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "숫자만 입력하세요.");
-            }
+            if (result == 0) result = -1; // 백도는 -1
+            game.addPendingThrow(result);
         }
         selectThrow();
     }
@@ -82,21 +70,22 @@ public class GameController {
         selectThrow();
     }
 
-    private void selectThrow(){
-        String[] str = new String[10];
+    private void selectThrow() {
         throwList = game.getPendingThrows();
-        for(int i = 0; i < throwList.size(); i++) str[i] = String.valueOf(throwList.get(i));
-        int option =  Integer.parseInt((String) JOptionPane.showInputDialog(null,
-                "적용할 윷",
-                "윷 선택",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                str,
-                str[0]));
+
+        // 선택지 문자열 준비
+        String[] str = new String[throwList.size()];
         for(int i = 0; i < throwList.size(); i++) {
-            if(throwList.get(i) == option) this.selectedIdx = i ; //selectedIdx = i;
+            str[i] = String.valueOf(throwList.get(i));
         }
-        moveValue = throwList.remove(this.selectedIdx);
+
+        // OptionPanel의 select 사용 → 드롭다운으로 선택
+        int selectedIndex = OptionPanel.select("적용할 윷", str);
+
+        if (selectedIndex == -1) return; // 취소하면 종료
+
+        // 선택한 윷 값과 throwList 매칭 후 제거 및 적용
+        moveValue = throwList.remove(selectedIndex);
         waitForClick = true;
     }
 
@@ -105,14 +94,14 @@ public class GameController {
         ArrayList<Piece> pieces = game.getBoard().getStart().getPieces();
         for (Piece piece : pieces) {
             if (piece.getOwner() == current) {
-                JOptionPane.showMessageDialog(null, "시작 슬롯에 이미 말이 있습니다.");
+                OptionPanel.alert("시작 슬롯에 이미 말이 있습니다.");
                 return;
             }
         }
         Piece newPiece = current.createPiece();
 
         if (newPiece == null) {
-            JOptionPane.showMessageDialog(null, "꺼낼 수 있는 말이 없습니다.");
+            OptionPanel.alert("꺼낼 수 있는 말이 없습니다.");
             return;
         }
 
@@ -130,9 +119,12 @@ public class GameController {
         if(waitForClick){
             Piece p = game.selectPiece(idx);
             if (p == null) {
-                JOptionPane.showMessageDialog(null, "이동할 수 있는 말이 없습니다.");
+                OptionPanel.alert("이동할 수 있는 말이 없습니다.");
                 return;
-                // TODO: 이제 movePiece 에서 piece 가 null 이 될수 없으므로 해당 코드들은 불필요함
+            }
+            if (p.getOwner() != game.getCurrentPlayer()) {
+                OptionPanel.alert("상대편의 말을 선택할 수 없습니다.");
+                return;
             }
             game.movePiece(p, moveValue);
             updateStatus();
