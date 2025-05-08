@@ -36,11 +36,19 @@ public class Player {
     }
 
     public Piece createPiece() {
-        if (pieces.size() >= maxPieceCount) return null;
+        if (!this.canCreatePiece()) return null;
 
         Piece p = new Piece(this);
         pieces.add(p);
         return p;
+    }
+
+    private boolean canCreatePiece() {
+        int num = 0;
+        for (Piece piece : pieces) {
+            num += piece.getCount();
+        }
+        return num < maxPieceCount;
     }
 
     public void removePiece(Piece piece) {
