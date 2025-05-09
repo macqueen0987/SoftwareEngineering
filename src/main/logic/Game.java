@@ -2,7 +2,6 @@ package main.logic;
 
 import main.view.PieceSelectPanel;
 
-import javax.lang.model.type.NullType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +19,7 @@ public class Game{
     private List<Player> players = new ArrayList<>();
     private int turn = 0;
     private int polygon = 4;
-    boolean caught = false;
+    private int additionalThrow = 0;
 
     public void setGameEventListener(GameEventListener listener) {
         this.listener = listener;
@@ -80,7 +79,7 @@ public class Game{
 
     public void chooseSticks(){
         int result = 0;
-        //TODO 윷 선택 과정
+        //TODO 이거 함수 안쓰입니다!!
         pendingThrows.add(result);
         System.out.println("Throw result: " + result);
 
@@ -126,10 +125,13 @@ public class Game{
         if (dest != null) {
             captured = target.move(dest); // <- move()가 잡은 말 반환
             if (captured != null) {
-                caught = true; // 잡았으면 턴 유지
+                System.out.println("말 잡음");
+                additionalThrow ++; // 잡았으면 턴 유지
+            } else if (additionalThrow > 0) {
+                additionalThrow --; // 추가 턴을 소모 했는데 말을 잡지 못한 경우
             }
         }
-
+        System.out.println("additionalThrow: " + additionalThrow);
         if(dest.num == -1){
             current.arrivePiece(target);
         }
@@ -142,11 +144,10 @@ public class Game{
         updateBoardView();
 
         // 윷/모 또는 잡았을 때 → 추가 턴 (턴 넘기지 않음)
-        if (!caught && pendingThrows.isEmpty()) {
+        if (additionalThrow <= 0 && pendingThrows.isEmpty()) {
             turn = (turn + 1) % players.size();
-
+            additionalThrow = 0;
         }
-        caught = false;
     }
 
     public void updateBoardView() {
