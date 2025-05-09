@@ -19,7 +19,7 @@ public class GameController {
     private final JFrame mainFrame;
     private List<Integer> throwList;
     private boolean waitForClick = false;
-    private int moveValue;
+    private int moveValue = -2; // -2는 윷을 던지지 않은 상태를 의미
 
     public GameController(UIComponents ui, GameConfig config, String[] colors, JFrame mainFrame) {
         this.ui = ui;
@@ -73,7 +73,12 @@ public class GameController {
     }
 
     private void onThrowSticks() {
+        if (!game.getPendingThrows().isEmpty() || moveValue >= -1) {
+            OptionPanel.alert("현재 던진 윷이 있습니다.");
+            return;
+        }
         game.throwSticks();
+        System.out.println(game.getPendingThrows());
         selectThrow();
     }
 
@@ -94,10 +99,11 @@ public class GameController {
         // 선택한 윷 값과 throwList 매칭 후 제거 및 적용
         moveValue = throwList.remove(selectedIndex);
         waitForClick = true;
+        System.out.println(game.getPendingThrows());
     }
 
     private void onNewPiece() {
-        if (game.getPendingThrows().isEmpty()){
+        if (game.getPendingThrows().isEmpty() && moveValue < -1){
             OptionPanel.alert("먼저 윷을 던져야 합니다.");
             return;
         }
@@ -139,7 +145,7 @@ public class GameController {
                 return;
             }
             game.movePiece(p, moveValue);
-
+            moveValue = -2; // 이동 후 초기화
             updateStatus();
             checkWinner();
             waitForClick = false;
