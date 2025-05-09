@@ -33,8 +33,7 @@ public class GameController {
             default -> 4;
         };
 
-        PieceSelectPanel panel = new PieceSelectPanel(config, colors);
-        this.game = new Game(polygon, config.teamCount(), colors, config.piecePerTeam(), panel);
+        this.game = new Game(polygon, config.teamCount(), colors, config.piecePerTeam());
 
         game.getBoardPublisher().subscribe(ui.boardPanel);
         game.getSticksPublisher().subscribe(ui.stickPanel);
@@ -75,7 +74,6 @@ public class GameController {
 
     private void onThrowSticks() {
         game.throwSticks();
-        //while(!throwList.isEmpty()) selectThrow();
         selectThrow();
     }
 
@@ -165,7 +163,7 @@ public class GameController {
     private void checkWinner() {
         for (int i = 0; i < config.teamCount(); i++) {
             Player player = game.getPlayer(i);
-            if (player.getScore() >= 5) {
+            if (player.getScore() >= config.piecePerTeam()) {
                 ((MainFrame) mainFrame).declareWinner(player.getColor());
             }
         }
