@@ -84,17 +84,21 @@ public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
 
         /* 2) 윷(막대) 그리기 */
         int x = startX;
-        boolean backdoDrawn = false;       // 백도 이미지를 이미 그렸는지 플래그
+        boolean isRealBackdo = (faces[0] && !faces[1] && !faces[2] && !faces[3]);
 
         for (int i = 0; i < 4; i++) {
             Image img;
-            if (backdo && !faces[i] && !backdoDrawn) {
-                // 뒤면( false ) 중 첫 번째를 백도로 교체
-                img = ResourceLoader.backdo().getImage();
-                backdoDrawn = true;
+
+            if (isRealBackdo) {
+                if (i == 0) {
+                    img = ResourceLoader.backdo().getImage(); // 백도
+                } else {
+                    img = ResourceLoader.stick(true).getImage(); // 나머지 앞면
+                }
             } else {
-                img = ResourceLoader.stick(faces[i]).getImage();
+                img = ResourceLoader.stick(faces[i]).getImage(); // 일반 상황
             }
+
             g2.drawImage(img, x, 50, stickW, stickW, null);
             x += stickGap;
         }
