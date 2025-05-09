@@ -1,8 +1,5 @@
 package main.logic;
 
-import main.view.PieceSelectPanel;
-
-import javax.lang.model.type.NullType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +9,6 @@ import java.util.concurrent.SubmissionPublisher;
 public class Game{
     private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
     private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
-    private PieceSelectPanel piecePanel;
     private GameEventListener listener;
 
     private final Board board;
@@ -27,9 +23,8 @@ public class Game{
     }
     private List<Integer> pendingThrows = new ArrayList<>();
 
-    public Game(int polygon, int teamCount, String[] colors, int piecePerTeam, PieceSelectPanel piecePanel) {
+    public Game(int polygon, int teamCount, String[] colors, int piecePerTeam) {
         this.polygon = polygon;
-        this.piecePanel = piecePanel;
         board = new Board(polygon);
 
         // 플레이어 생성
