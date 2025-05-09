@@ -3,4 +3,5 @@ package main.logic;
 
 public interface GameEventListener {
     void onPieceCaptured(Piece captured);
+    void onPieceUsed(Player player);
 }

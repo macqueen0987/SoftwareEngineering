@@ -1,6 +1,7 @@
 package main.controller;
 
 import main.logic.Game;
+import main.logic.GameEventListener;
 import main.logic.Piece;
 import main.logic.Player;
 import main.model.GameConfig;
@@ -47,8 +48,16 @@ public class GameController {
         ui.newPieceButton.addActionListener(e -> onNewPiece());
         ui.boardPanel.setSlotClickListener(this::onSelectSlot);
         ui.forceThrowButton.addActionListener(e -> forceThrowSticks());
-        this.game.setGameEventListener(captured -> {
-            ui.piecePanel.returnPiece(captured.getOwner().getColor());
+        this.game.setGameEventListener(new GameEventListener() {
+            @Override
+            public void onPieceCaptured(Piece captured) {
+                ui.piecePanel.returnPiece(captured.getOwner().getColor());
+            }
+
+            @Override
+            public void onPieceUsed(Player player) {
+                ui.piecePanel.usePiece(player.getColor());
+            }
         });
 
 
@@ -121,6 +130,7 @@ public class GameController {
     }
 
     private void onSelectSlot(int idx){
+
         if(waitForClick){
             Piece p = game.selectPiece(idx);
             if (p == null) {
@@ -132,6 +142,7 @@ public class GameController {
                 return;
             }
             game.movePiece(p, moveValue);
+
             updateStatus();
             checkWinner();
             waitForClick = false;

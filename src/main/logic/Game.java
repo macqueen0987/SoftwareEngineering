@@ -106,6 +106,12 @@ public class Game{
         else if (current.getPieces().isEmpty()) {
             target = current.createPiece();
             target.setSlot(board.getStart());
+
+            // 새 말을 꺼냈으므로 이벤트로 UI에 알림
+            if (listener != null) {
+                listener.onPieceUsed(current);
+                System.out.println("Piece moved: " + current);
+            }
         } else {
             target = current.getPieces().get(0);
         }
