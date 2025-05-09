@@ -65,17 +65,28 @@ public class PieceSelectPanel extends JPanel {
     }
 
     public void usePiece(String teamColor) {
+        System.out.println("usePiece 호출됨: " + teamColor);
         for (int i = 0; i < pieceLabels.size(); i++) {
             if (teamColors[i].equals(teamColor)) {
                 List<JLabel> teamList = pieceLabels.get(i);
-                if (!teamList.isEmpty()) {
-                    JLabel lbl = teamList.get(0);
-                    lbl.setVisible(false);
+
+                for (JLabel lbl : teamList) {
+                    if (lbl.isVisible()) {
+                        lbl.setVisible(false);
+                        revalidate(); // UI 갱신
+                        repaint();
+                        return;
+                    }
                 }
-                break;
+
+                System.out.println("해당 팀에 표시된 말이 없습니다: " + teamColor);
+                return;
             }
         }
+
+        System.out.println("해당하는 teamColor를 찾지 못함: " + teamColor);
     }
+
 
     public void returnPiece(String teamColor) {
         System.out.println("returnPiece 호출됨: " + teamColor);
