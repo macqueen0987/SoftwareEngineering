@@ -11,11 +11,6 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-TODO: 여기 곳곳에 JOptionPane.showMessageDialog(null, "메시지")가 있는데, 이걸 UIComponents로 빼서
-UI는 완전히 분리해야 될것 같습니다. 안그러면 나중에 다른 UI를 사용하게 될때 여기저기 수정해야합니다.
-*/
-
 public class GameController {
 
     private final Game game;
@@ -68,7 +63,7 @@ public class GameController {
         /* 내가 원하는 윷의 결과를 지정할 수 있도록 하는 메소드 */
         while (true) {
             String[] options = {"백도", "도", "개", "걸", "윷", "모"};
-            int result = OptionPanel.select("윷 결과를 선택하세요", options);
+            int result = OptionPanel.select("윷 결과를 선택하세요.", "확인 후 취소를 눌러 선택을 완료하세요.", options);
 
             if (result == -1) break; // 취소한 경우
 
@@ -104,6 +99,10 @@ public class GameController {
     }
 
     private void onNewPiece() {
+        if (game.getPendingThrows().isEmpty()){
+            OptionPanel.alert("먼저 윷을 던져야 합니다.");
+            return;
+        }
         Player current = game.getCurrentPlayer();
         ArrayList<Piece> pieces = game.getBoard().getStart().getPieces();
         for (Piece piece : pieces) {
