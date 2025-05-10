@@ -214,7 +214,7 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
         // 1. 외곽선 그리기 (꼭짓점들 간)
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2f));
-        int[] cornerIndices = {1, 6, 11, 16, 21};
+        int[] cornerIndices = {0, 5, 10, 15, 20};
         for (int i = 0; i < cornerIndices.length; i++) {
             Point a = slots[cornerIndices[i]];
             Point b = slots[cornerIndices[(i + 1) % cornerIndices.length]];
@@ -223,7 +223,7 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
 
         // 2. 중심선 연결
         g2.setColor(Color.GRAY);
-        Point center = slots[0];
+        Point center = slots[25];
         for (int idx : cornerIndices) {
             Point corner = slots[idx];
             g2.drawLine(center.x, center.y, corner.x, corner.y);
@@ -256,7 +256,7 @@ public class BoardPanel extends JPanel implements Flow.Subscriber<List<StructPie
 
     private boolean isCornerIndex(int i) {
         // 중심 제외하고 꼭짓점 인덱스는 1,6,11,16,21
-        return i == 1 || i == 6 || i == 11 || i == 16 || i == 21;
+        return i == 0 || i == 5 || i == 10 || i == 15 || i == 20;
     }
 
     private void drawHexagonBoard(Graphics2D g){
