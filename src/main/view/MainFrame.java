@@ -1,99 +1,98 @@
 package main.view;
 
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import main.controller.GameController;
 import main.controller.UIComponents;
 import main.model.GameConfig;
-import javax.swing.*;
-import java.awt.*;
 
-public class MainFrame extends JFrame {
-    public MainFrame(GameConfig cfg) {
-        String[] colors = {"red", "blue", "green", "yellow"}; // 팀 색상 일단 4개로 고정
+/**
+ * JavaFX 버전의 MainFrame (JFrame → Stage)
+ */
+public class MainFrame {
+    private final Stage stage;
+    private final GameConfig cfg;
+    private final String[] colors = {"red", "blue", "green", "yellow"};
 
-        setTitle("윷놀이 - 통합 레이아웃");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+    public MainFrame(Stage stage, GameConfig cfg) {
+        this.stage = stage;
+        this.cfg = cfg;
+        buildUI();
+    }
 
-        // [1] 보드 패널 (중앙)
+    private void buildUI() {
+        stage.setTitle("윷놀이 - 통합 레이아웃");
+        BorderPane root = new BorderPane();
+
+        // [1] 중앙 보드
         BoardPanel boardPanel = new BoardPanel(cfg.boardShape());
-        add(boardPanel, BorderLayout.CENTER);
+        root.setCenter(boardPanel);
 
-        // [2] 오른쪽 패널 구성 (StickPanel + 버튼 + 말 선택 패널)
+        // [2] 우측 패널
         StickPanel stickPanel = new StickPanel();
-        JButton forceThrowButton = new JButton("지정 윷 던지기");
-        JButton randomThrowButton = new JButton("랜덤 윷 던지기");
-        Font btnFont = new Font("SansSerif", Font.BOLD, 18);
-        forceThrowButton.setFont(btnFont);
-        randomThrowButton.setFont(btnFont);
+        Button forceThrowButton = new Button("지정 윷 던지기");
+        Button randomThrowButton = new Button("랜덤 윷 던지기");
+        forceThrowButton.setFont(Font.font("SansSerif", 18));
+        randomThrowButton.setFont(Font.font("SansSerif", 18));
 
-        // 버튼 2개를 담을 패널 (좌우 정렬)
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
-        buttonPanel.setOpaque(false); // 배경 투명
-        buttonPanel.add(forceThrowButton);
-        buttonPanel.add(randomThrowButton);
+        HBox buttonBox = new HBox(20, forceThrowButton, randomThrowButton);
+        buttonBox.setPadding(new Insets(0, 0, 0, 0));
+        buttonBox.setBackground(null);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg, colors);
 
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setPreferredSize(new Dimension(560, 700));
-        rightPanel.setBackground(new Color(210, 180, 140));
+        VBox rightPanel = new VBox(30, stickPanel, buttonBox, piecePanel);
+        rightPanel.setPadding(new Insets(20));
+        rightPanel.setStyle("-fx-background-color: #D2B48C;");
+        VBox.setVgrow(piecePanel, Priority.ALWAYS);
+        root.setRight(rightPanel);
 
-        rightPanel.add(Box.createVerticalStrut(20));
-        rightPanel.add(stickPanel);
-        rightPanel.add(Box.createVerticalStrut(30));
-        rightPanel.add(buttonPanel);
-        rightPanel.add(Box.createVerticalStrut(30));
-        rightPanel.add(piecePanel);
-        rightPanel.add(Box.createVerticalGlue());
-
-        add(rightPanel, BorderLayout.EAST);
-
-        // [3] 상태 패널 (하단)
+        // [3] 하단 상태 패널
         StatusPanel statusPanel = new StatusPanel(cfg.teamCount(), colors);
-        add(statusPanel, BorderLayout.SOUTH);
+        root.setBottom(statusPanel);
 
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
+        Scene scene = new Scene(root, 1200, 800);
+        stage.setScene(scene);
+        stage.show();
 
-        JButton newPieceButton = piecePanel.getNewPieceButton();
-        // [★ 중요 ★] GameController 연결 (UI와 게임 연결)
-        UIComponents ui = new UIComponents(boardPanel, stickPanel, statusPanel, randomThrowButton, forceThrowButton, newPieceButton, piecePanel);
-        GameController controller = new GameController(ui, cfg, colors, this);
-
-        // forceThrowButton 리스너는 필요 시 controller에서 추가 연결
+        // 컨트롤러 연결
+        UIComponents ui = new UIComponents(
+                boardPanel,
+                stickPanel,
+                statusPanel,
+                randomThrowButton,
+                forceThrowButton,
+                piecePanel.getNewPieceButton(),
+                piecePanel
+        );
+        new GameController(ui, cfg, colors, this);
     }
 
     public void declareWinner(String color) {
-        int option = JOptionPane.showConfirmDialog(this,
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                 color.toUpperCase() + " 플레이어가 승리했습니다!\n다시 하시겠습니까?",
-                "게임 종료",
-                JOptionPane.YES_NO_OPTION);
-
-        if (option == JOptionPane.YES_OPTION) {
-            restartGame();
-        } else {
-            System.exit(0);
-        }
+                ButtonType.YES, ButtonType.NO);
+        alert.setTitle("게임 종료");
+        alert.showAndWait().ifPresent(bt -> {
+            if (bt == ButtonType.YES) restartGame();
+            else stage.close();
+        });
     }
 
     private void restartGame() {
-        this.dispose();
-
-        // 새 게임 시작 (SetupDialog 통해서 설정받기)
-        SwingUtilities.invokeLater(() -> {
-            SetupDialog setup = new SetupDialog(null);
-            GameConfig config = setup.showDialog();
-
-            // 사용자가 취소한 경우
-            if (config == null) {
-                System.exit(0);
-                return;
-            }
-
-            MainFrame newGame = new MainFrame(config);
-            newGame.setVisible(true);
-        });
+        stage.close();
+        // JavaFX용 SetupDialog 호출 및 재시작 로직 필요
+        SetupDialog dialog = new SetupDialog(stage);
+        GameConfig newCfg = dialog.showDialog();
+        if (newCfg != null) new MainFrame(stage, newCfg);
     }
 }

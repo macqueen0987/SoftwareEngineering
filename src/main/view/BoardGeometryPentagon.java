@@ -1,120 +1,122 @@
 package main.view;
 
-import java.awt.*;
+import javafx.geometry.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JavaFX 버전의 5각형 보드 기하 정보 클래스
+ */
 public final class BoardGeometryPentagon {
 
+    /** 기준 보드 크기 */
     private static final int BASE = 650;
 
-    // 게임 로직용 재정렬된 슬롯 배열 (0번부터 시작해서 시계 반대방향 외곽 우선)
-    public static final Point[] SLOT = new Point[36];
+    /** 원본 좌표를 저장하는 리스트 */
+    private static final List<Point2D> RAW = new ArrayList<>();
 
-
-    // 슬롯 좌표들 (중심, 꼭짓점, 외곽, 보조점 총 36개)
-    public static final Point[] T_SLOT = new Point[36];
-    public static final Point[] T_SLOT_COPY = new Point[36];
-    private static final List<Point> RAW = new ArrayList<>();
+    /** 패널에 맞춰 스케일 및 이동된 좌표 배열 */
+    public static final Point2D[] T_SLOT = new Point2D[36];
+    public static final Point2D[] T_SLOT_COPY = new Point2D[36];
+    public static final Point2D[] SLOT = new Point2D[36];
 
     static {
         // 중심점
-        Point center = new Point(BASE / 2, BASE / 2);
+        Point2D center = new Point2D(BASE / 2.0, BASE / 2.0);
 
+        // 5각형 꼭짓점 계산
         int sides = 5;
-        int radius = 250;
-        Point[] corners = new Point[sides];
-
-        // 꼭짓점
+        double radius = 250;
+        Point2D[] corners = new Point2D[sides];
         for (int i = 0; i < sides; i++) {
             double angle = Math.toRadians(54 - i * 360.0 / sides);
-            int x = (int) (center.x + radius * Math.cos(angle));
-            int y = (int) (center.y + radius * Math.sin(angle));
-            corners[i] = new Point(x, y);
+            double x = center.getX() + radius * Math.cos(angle);
+            double y = center.getY() + radius * Math.sin(angle);
+            corners[i] = new Point2D(x, y);
         }
 
-        // 꼭짓점 및 각 변마다 4개씩 점 추가 (총 5x5 = 25)
+        // 외곽 꼭짓점 및 각 변마다 4개 보조점 추가
         for (int i = 0; i < sides; i++) {
-            Point start = corners[i];
-            Point end = corners[(i + 1) % sides];
-            RAW.add(start); // 꼭짓점
-
+            Point2D start = corners[i];
+            Point2D end = corners[(i + 1) % sides];
+            RAW.add(start);
             for (int j = 1; j <= 4; j++) {
                 double t = j / 5.0;
-                int x = (int) (start.x + t * (end.x - start.x));
-                int y = (int) (start.y + t * (end.y - start.y));
-                RAW.add(new Point(x, y));
+                double ix = start.getX() + t * (end.getX() - start.getX());
+                double iy = start.getY() + t * (end.getY() - start.getY());
+                RAW.add(new Point2D(ix, iy));
             }
         }
 
+        // 중앙점 추가
         RAW.add(center);
 
-        // 중심과 꼭짓점 사이에 2개 보조 점씩 (총 5x2 = 10)
-        for(int i = 0; i < 5; i++){
-            Point corner = corners[(i + 1) % 5];
-            if(i <= 2){
-                for (int j = 2; j >= 1; j--) {
-                    double t = j / 3.0;
-                    int x = (int) (center.x + t * (corner.x - center.x));
-                    int y = (int) (center.y + t * (corner.y - center.y));
-                    RAW.add(new Point(x, y));
-                }
-            }
-            else{
-                for (int j = 1; j <= 2; j++) {
-                    double t = j / 3.0;
-                    int x = (int) (center.x + t * (corner.x - center.x));
-                    int y = (int) (center.y + t * (corner.y - center.y));
-                    RAW.add(new Point(x, y));
-                }
+        // 중앙과 각 꼭짓점 사이 보조점 2개 추가
+        for (int i = 0; i < sides; i++) {
+            Point2D corner = corners[(i + 1) % sides];
+            for (int j = 1; j <= 2; j++) {
+                double t = (i <= 2 ? (3 - j) : j) / 3.0;
+                double ix = center.getX() + t * (corner.getX() - center.getX());
+                double iy = center.getY() + t * (corner.getY() - center.getY());
+                RAW.add(new Point2D(ix, iy));
             }
         }
 
-        // 리스트 → 배열로 변환
-        for (int i = 0; i < RAW.size(); i++) {
+        // 배열에 RAW 복사
+        for (int i = 0; i < RAW.size() && i < T_SLOT.length; i++) {
             T_SLOT[i] = RAW.get(i);
+            T_SLOT_COPY[i] = RAW.get(i);
         }
 
-        // 외곽 점들을 원하는 순서로 GAME_SLOT에 배치
-        System.arraycopy(T_SLOT, 0, SLOT, 0, 36);
+        // 기본 게임 슬롯 순서로 복사
+        System.arraycopy(T_SLOT, 0, SLOT, 0, SLOT.length);
     }
 
-    private BoardGeometryPentagon() {}
+    private BoardGeometryPentagon() {
+        // 유틸리티 클래스
+    }
 
-    public static void scaleToPanel(Dimension panel) {
-        double scale = Math.min(panel.width, panel.height) / (double) BASE;
-        int offsetX = (panel.width - (int)(BASE * scale)) / 2;
-        int offsetY = (panel.height - (int)(BASE * scale)) / 2;
-
-        for (int i = 0; i < T_SLOT.length; i++) {
-            T_SLOT[i].x = (int) Math.round(RAW.get(i).x * scale) + offsetX;
-            T_SLOT[i].y = (int) Math.round(RAW.get(i).y * scale) + offsetY;
+    /**
+     * 패널 크기에 맞춰 스케일 및 중앙 배치
+     */
+    public static void scaleToPane(double paneWidth, double paneHeight) {
+        double scale = Math.min(paneWidth, paneHeight) / BASE;
+        double offsetX = (paneWidth - BASE * scale) / 2;
+        double offsetY = (paneHeight - BASE * scale) / 2;
+        for (int i = 0; i < RAW.size() && i < T_SLOT.length; i++) {
+            double x = RAW.get(i).getX() * scale + offsetX;
+            double y = RAW.get(i).getY() * scale + offsetY;
+            T_SLOT[i] = new Point2D(x, y);
         }
+        System.arraycopy(T_SLOT, 0, SLOT, 0, T_SLOT.length);
     }
 
-    public static int slotAt(int x, int y) {
+    /**
+     * 클릭 좌표로부터 슬롯 인덱스 검색
+     */
+    public static int slotAt(double x, double y) {
         for (int i = 0; i < T_SLOT.length; i++) {
-            if (T_SLOT[i].distanceSq(x, y) < 18 * 18) return i;
+            if (T_SLOT[i].distance(x, y) < 18) return i;
         }
         return -1;
     }
 
-    public static Point offset(int slot, int order) {
-        Point p = SLOT[slot];
-        int off = 10;
-
-        return switch (order) {
-            case 1 -> new Point(p.x + off, p.y);
-            case 2 -> new Point(p.x,       p.y + off);
-            case 3 -> new Point(p.x - off, p.y);
-            case 4 -> new Point(p.x,       p.y - off);
-            case 5 -> new Point(p.x + off, p.y + off);
-            case 6 -> new Point(p.x - off, p.y + off);
-            case 7 -> new Point(p.x + off, p.y - off);
-            case 8 -> new Point(p.x - off, p.y - off);
-            default -> p;
-        };
+    /**
+     * 동일 슬롯 내 말 겹침 오프셋 계산
+     */
+    public static Point2D offset(int slot, int order) {
+        Point2D p = T_SLOT[slot];
+        double off = 10;
+        switch (order) {
+            case 1:  return new Point2D(p.getX() + off, p.getY());
+            case 2:  return new Point2D(p.getX(),        p.getY() + off);
+            case 3:  return new Point2D(p.getX() - off, p.getY());
+            case 4:  return new Point2D(p.getX(),        p.getY() - off);
+            case 5:  return new Point2D(p.getX() + off, p.getY() + off);
+            case 6:  return new Point2D(p.getX() - off, p.getY() + off);
+            case 7:  return new Point2D(p.getX() + off, p.getY() - off);
+            case 8:  return new Point2D(p.getX() - off, p.getY() - off);
+            default: return p;
+        }
     }
-
-
 }

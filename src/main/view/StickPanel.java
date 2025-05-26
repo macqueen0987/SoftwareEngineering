@@ -1,23 +1,37 @@
 package main.view;
 
-import javax.swing.*;
-import java.awt.*;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+
 import java.util.Arrays;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.Flow;
 
-public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
-
-    private boolean[] faces = {true, true, true, true};
-    private boolean   backdo = false;
+/**
+ * JavaFX 버전의 StickPanel
+ */
+public class StickPanel extends Pane implements Flow.Subscriber<boolean[]> {
     private Flow.Subscription subscription;
+    private boolean[] faces = {true, true, true, true};
+    private boolean backdo = false;
+    private final Canvas canvas;
+
+    public StickPanel() {
+        // 기본 크기 설정
+        canvas = new Canvas(540, 200);
+        getChildren().add(canvas);
+        // 리사이즈 대응
+        widthProperty().addListener((obs, oldW, newW) -> resizeCanvas());
+        heightProperty().addListener((obs, oldH, newH) -> resizeCanvas());
+        draw();
+    }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
+    public void onSubscribe(Flow.Subscription s) {
+        this.subscription = s;
+        subscription.request(1);
     }
 
     @Override
@@ -27,8 +41,8 @@ public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
     }
 
     @Override
-    public void onError(Throwable throwable) {
-        System.out.println("StickPanel error: " + throwable);
+    public void onError(Throwable t) {
+        System.err.println("StickPanel error: " + t);
     }
 
     @Override
@@ -36,70 +50,65 @@ public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
         System.out.println("StickPanel updates complete");
     }
 
-    public StickPanel() {
-        setPreferredSize(new Dimension(540, 170));   // 기존 크기 그대로
-        setOpaque(false);
-    }
-
-    public void setFaces(boolean[] arr, boolean isBackdo) {
-        if (arr == null || arr.length != 4) return;
-        faces  = arr.clone();
-        backdo = isBackdo;
-        repaint();
-    }
-
-    public void setFaces(boolean[] arr){
-        faces = Arrays.copyOfRange(arr,0,4);
+    /**
+     * 윷 결과 업데이트 (backdo 포함)
+     */
+    public void setFaces(boolean[] arr) {
+        if (arr == null || arr.length < 5) return;
+        faces = Arrays.copyOfRange(arr, 0, 4);
         backdo = arr[4];
-        repaint();
+        draw();
     }
 
-    public int getResult(){
-        int result = 0;
-        if(backdo) return -1;
-        for(int i = 0; i < 4; i ++){
-            if(faces[i]) result++;
-        }
-        if(result == 0) return 5;
-        return result;
+    /**
+     * 윷 결과 개수 반환 (-1: 백도, 1~4: 앞면 개수, 5: 모)
+     */
+    public int getResult() {
+        if (backdo) return -1;
+        int count = 0;
+        for (boolean f : faces) if (f) count++;
+        return count == 0 ? 5 : count;
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
+    private void resizeCanvas() {
+        double w = getWidth();
+        double h = getHeight();
+        canvas.setWidth(w);
+        canvas.setHeight(h);
+        draw();
+    }
 
-        /* 1) 타원형 배경판 */
-        int stickGap = 90;                 // 막대 간격
-        int stickW   = 120;
-        int startX   = 90;
-        int totalW   = stickW + 3 * stickGap;      // 항상 4개만 그리므로 3칸 간격
-        int ovalX    = startX - 20;
-        int ovalW    = totalW + 40;
-        int ovalY    = 10;
-        int ovalH    = 200;
+    private void draw() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double w = canvas.getWidth();
+        double h = canvas.getHeight();
+        gc.clearRect(0, 0, w, h);
 
-        g2.setColor(new Color(235, 202, 111));
-        g2.fillOval(ovalX, ovalY, ovalW, ovalH);
+        // 1) 배경 타원
+        gc.setFill(Color.web("#EBCF6F"));
+        double stickGap = 90;
+        double stickW = 120;
+        double startX = 90;
+        double totalW = stickW + 3 * stickGap;
+        double ovalX = startX - 20;
+        double ovalW = totalW + 40;
+        double ovalY = 10;
+        double ovalH = 200;
+        gc.fillOval(ovalX, ovalY, ovalW, ovalH);
 
-        /* 2) 윷(막대) 그리기 */
-        int x = startX;
-        boolean isRealBackdo = (faces[0] && !faces[1] && !faces[2] && !faces[3]);
-
+        // 2) 윷 그리기
+        double x = startX;
+        boolean isRealBackdo = faces[0] && !faces[1] && !faces[2] && !faces[3];
         for (int i = 0; i < 4; i++) {
             Image img;
-
             if (isRealBackdo) {
-                if (i == 0) {
-                    img = ResourceLoader.backdo().getImage(); // 백도
-                } else {
-                    img = ResourceLoader.stick(true).getImage(); // 나머지 앞면
-                }
+                img = (i == 0)
+                        ? ResourceLoader.backdo()
+                        : ResourceLoader.stick(true);
             } else {
-                img = ResourceLoader.stick(faces[i]).getImage(); // 일반 상황
+                img = ResourceLoader.stick(faces[i]);
             }
-
-            g2.drawImage(img, x, 50, stickW, stickW, null);
+            gc.drawImage(img, x, 50, stickW, stickW);
             x += stickGap;
         }
     }

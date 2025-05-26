@@ -1,19 +1,31 @@
 package main;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
 import main.model.GameConfig;
-import main.view.MainFrame;
-import main.view.SetupDialog;
+import main.view.SetupDialog;  // JavaFX 버전 SetupDialog
+import main.view.MainFrame;    // JavaFX 버전 MainFrame
 
-import javax.swing.SwingUtilities;
+/**
+ * JavaFX 애플리케이션 진입점
+ */
+public class MainGUI extends Application {
 
-public class MainGUI {
-    public static void main(String[] args){
-        SwingUtilities.invokeLater(() -> {
-            SetupDialog dlg = new SetupDialog(null);   // 설정 창
-            GameConfig cfg = dlg.showDialog();         // 사용자가 "확인" 누르면 값 반환
-            if (cfg != null) {
-                new MainFrame(cfg);                    // 선택값으로 메인 화면 띄우기
-            }
-        });
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        // JavaFX 다이얼로그 호출 (no-arg 생성자 사용)
+        SetupDialog dlg = new SetupDialog(primaryStage);
+        GameConfig cfg = dlg.showDialog();
+        if (cfg == null) {
+            primaryStage.close();
+            return;
+        }
+
+        // JavaFX 메인 화면 표시
+        new MainFrame(primaryStage, cfg);
     }
 }

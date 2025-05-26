@@ -157,6 +157,7 @@ public class Game{
                 uiPieces.add(new StructPiece(i, piece.getOwner().getColor(), 0));
             }
         }
+
         boardPublisher.submit(uiPieces);
     }
 

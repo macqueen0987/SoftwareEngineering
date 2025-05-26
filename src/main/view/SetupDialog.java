@@ -1,56 +1,60 @@
 package main.view;
 
+import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Window;
 import main.model.GameConfig;
 
-import javax.swing.*;
-import java.awt.*;
+/**
+ * JavaFX 버전의 SetupDialog (Dialog<GameConfig>)
+ */
+public class SetupDialog extends Dialog<GameConfig> {
+    public SetupDialog(Window owner) {
+        setTitle("게임 설정");
+        getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-public class SetupDialog extends JDialog {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 10, 10, 10));
 
-    private GameConfig config = null;          // 사용자가 고른 최종 결과
+        ComboBox<String> cboShape = new ComboBox<>(FXCollections.observableArrayList("사각", "오각", "육각"));
+        ComboBox<Integer> cboTeam  = new ComboBox<>(FXCollections.observableArrayList(2, 3, 4));
+        ComboBox<Integer> cboPiece = new ComboBox<>(FXCollections.observableArrayList(2, 3, 4, 5));
+        cboShape.getSelectionModel().selectFirst();
+        cboTeam.getSelectionModel().selectFirst();
+        cboPiece.getSelectionModel().selectFirst();
 
-    public SetupDialog(Frame owner) {
-        super(owner, "게임 설정", true);        // 모달 다이얼로그
-        setLayout(new GridLayout(4, 2, 10, 10));
-        setPreferredSize(new Dimension(300, 200));
+        grid.add(new Label("보드 모양"), 0, 0);
+        grid.add(cboShape, 1, 0);
+        grid.add(new Label("팀 수"),   0, 1);
+        grid.add(cboTeam,  1, 1);
+        grid.add(new Label("말 개수"), 0, 2);
+        grid.add(cboPiece, 1, 2);
 
-        /* ── 1) 보드 모양 ─────────────────── */
-        add(new JLabel("보드 모양"));
-        JComboBox<String> cboShape =
-                new JComboBox<>(new String[]{"사각", "오각", "육각"});
-        add(cboShape);
+        getDialogPane().setContent(grid);
 
-        /* ── 2) 팀 수 ──────────────────────── */
-        add(new JLabel("팀 수"));
-        JComboBox<Integer> cboTeam =
-                new JComboBox<>(new Integer[]{2, 3, 4});
-        add(cboTeam);
-
-        /* ── 3) 팀당 말 개수 ───────────────── */
-        add(new JLabel("말 개수"));
-        JComboBox<Integer> cboPiece =
-                new JComboBox<>(new Integer[]{2, 3, 4, 5});
-        add(cboPiece);
-
-        /* ── 4) 확인 버튼 ──────────────────── */
-        JButton ok = new JButton("확인");
-        ok.addActionListener(e -> {
-            config = new GameConfig(
-                    (String)  cboShape.getSelectedItem(),
-                    (Integer) cboTeam.getSelectedItem(),
-                    (Integer) cboPiece.getSelectedItem()
-            );
-            dispose();                         // 창 닫기
+        setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return new GameConfig(
+                        cboShape.getValue(),
+                        cboTeam.getValue(),
+                        cboPiece.getValue()
+                );
+            }
+            return null;
         });
-        add(ok);
-
-        pack();
-        setLocationRelativeTo(owner);
     }
 
-    /** 다이얼로그를 띄우고 선택값을 돌려준다. (취소 시 null) */
+    /**
+     * 다이얼로그를 띄우고 선택값 반환 (취소 시 null)
+     */
     public GameConfig showDialog() {
-        setVisible(true);
-        return config;
+        return showAndWait().orElse(null);
     }
 }

@@ -1,15 +1,18 @@
 package main.view;
 
-import javax.swing.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.util.Callback;
 
 /**
- * 옵션 선택 및 알림창을 띄우는 유틸리티 클래스
+ * JavaFX 버전의 OptionPanel 유틸리티 클래스
  */
 public class OptionPanel {
 
     /**
      * 옵션 선택 드롭다운 창을 띄우고 선택값 반환 (0 ~ options.length-1)
-     * @param title 창 제목
+     * @param title   창 제목
      * @param options 선택지 문자열 배열
      * @return 선택된 인덱스 (-1 = 취소)
      */
@@ -19,40 +22,47 @@ public class OptionPanel {
 
     /**
      * 옵션 선택 드롭다운 창을 띄우고 선택값 반환 (0 ~ options.length-1)
-     * @param title 창 제목
+     * @param title   창 제목
      * @param message 본문 메시지
      * @param options 선택지 문자열 배열
      * @return 선택된 인덱스 (-1 = 취소)
      */
     public static int select(String title, String message, String[] options) {
-        JComboBox<String> comboBox = new JComboBox<>(options);
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(new JLabel(message)); // 본문 메시지 추가
-        panel.add(Box.createVerticalStrut(10)); // 간격
-        panel.add(comboBox); // 드롭다운 추가
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(options.length>0?options[0]:null, options);
+        dialog.setTitle(title);
+        dialog.setHeaderText(null);
+        dialog.setContentText(message);
+        dialog.getDialogPane().setPrefWidth(300);
 
-        int result = JOptionPane.showConfirmDialog(null, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result == JOptionPane.OK_OPTION) {
-            return comboBox.getSelectedIndex();
-        } else {
-            return -1;
-        }
+        return dialog.showAndWait()
+                .map(choice -> java.util.Arrays.asList(options).indexOf(choice))
+                .orElse(-1);
     }
-
 
     /**
      * 일반 텍스트 입력
+     * @param message 메시지
+     * @return 입력된 문자열 (취소 시 null)
      */
     public static String input(String message) {
-        return JOptionPane.showInputDialog(null, message, "입력", JOptionPane.PLAIN_MESSAGE);
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("입력");
+        dialog.setHeaderText(null);
+        dialog.setContentText(message);
+        dialog.getDialogPane().setPrefWidth(300);
+
+        return dialog.showAndWait().orElse(null);
     }
 
     /**
      * 알림창
+     * @param message 메시지
      */
     public static void alert(String message) {
-        JOptionPane.showMessageDialog(null, message);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("알림");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
