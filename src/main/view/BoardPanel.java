@@ -127,19 +127,27 @@ public class BoardPanel extends Pane implements Flow.Subscriber<List<StructPiece
     }
 
     private void drawSlots(GraphicsContext gc) {
-        gc.setFill(Color.web("#A37321"));
         gc.setStroke(Color.web("#644614"));
         gc.setFont(Font.font("SansSerif", 10));
+
         Set<Integer> special = Set.of(0, 5, 10, 15, 20);
         for (int i = 0; i < BoardGeometry.SLOT.length; i++) {
             Point2D p = BoardGeometry.SLOT[i];
             double R = special.contains(i) ? 30 : 20;
+
+            // 1) 매번 갈색으로 채우기
+            gc.setFill(Color.web("#A37321"));
             gc.fillOval(p.getX() - R, p.getY() - R, 2 * R, 2 * R);
+
+            // 2) 테두리
             gc.strokeOval(p.getX() - R, p.getY() - R, 2 * R, 2 * R);
+
+            // 3) 번호
             gc.setFill(Color.DARKGRAY);
             gc.fillText(String.valueOf(i), p.getX() - R - 7, p.getY() - R - 3);
         }
     }
+
 
     private void drawPieces(GraphicsContext gc) {
         for (StructPiece pc : pieces) {
