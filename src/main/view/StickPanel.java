@@ -20,7 +20,7 @@ public class StickPanel extends Pane implements Flow.Subscriber<boolean[]> {
 
     public StickPanel() {
         // 기본 크기 설정
-        canvas = new Canvas(540, 200);
+        canvas = new Canvas(540, 250);
         getChildren().add(canvas);
         // 리사이즈 대응
         widthProperty().addListener((obs, oldW, newW) -> resizeCanvas());
