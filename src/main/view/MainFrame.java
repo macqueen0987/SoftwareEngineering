@@ -1,6 +1,7 @@
 package main.view;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -45,12 +46,16 @@ public class MainFrame {
         randomThrowButton.setFont(Font.font("SansSerif", 18));
 
         HBox buttonBox = new HBox(20, forceThrowButton, randomThrowButton);
-        buttonBox.setPadding(new Insets(0, 0, 0, 0));
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.setPadding(new Insets(10, 10, 10, 10));
         buttonBox.setBackground(null);
 
         PieceSelectPanel piecePanel = new PieceSelectPanel(cfg, colors);
 
-        VBox rightPanel = new VBox(30, stickPanel, buttonBox, piecePanel);
+        VBox stickAndButtons = new VBox(10, stickPanel, buttonBox);
+        stickAndButtons.setAlignment(Pos.CENTER);
+
+        VBox rightPanel = new VBox(30, stickAndButtons, piecePanel);
         rightPanel.setPadding(new Insets(20));
         rightPanel.setStyle("-fx-background-color: #D2B48C;");
         VBox.setVgrow(piecePanel, Priority.ALWAYS);

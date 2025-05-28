@@ -1,16 +1,12 @@
 package main.view;
 
+import javafx.geometry.Pos;
+import javafx.scene.layout.*;
 import main.model.GameConfig;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -65,7 +61,10 @@ public class PieceSelectPanel extends VBox {
         newPieceBtn.setFont(Font.font("SansSerif", 16));
         newPieceBtn.setMaxWidth(200);
         newPieceBtn.setBackground(new Background(new BackgroundFill(Color.web("#C8DCF0"), new CornerRadii(5), Insets.EMPTY)));
-        getChildren().add(newPieceBtn);
+        HBox buttonWrapper = new HBox(newPieceBtn);
+        buttonWrapper.setAlignment(Pos.CENTER); // ⬅️ 중앙 정렬!
+        getChildren().add(buttonWrapper);
+
     }
 
     /** 새 말 꺼내기 버튼 반환 */
