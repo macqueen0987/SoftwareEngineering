@@ -136,7 +136,10 @@ public class Game{
 
         // 잡힌 말이 있으면 UI에 다시 표시
         if (captured != null && listener != null) {
-            listener.onPieceCaptured(captured);
+            for (int i = 0; i < captured.getCount(); i++) {
+                Piece dummy = new Piece(captured.getOwner()); // 임시 말 생성
+                listener.onPieceCaptured(dummy);              // 개수만큼 UI에 표시
+            }
         }
 
         updateBoardView();
@@ -154,12 +157,15 @@ public class Game{
             BoardSlot slot = board.getSlot(i);
             Piece piece = slot.getPiece();
             if (piece != null) {
-                uiPieces.add(new StructPiece(i, piece.getOwner().getColor(), 0));
+                for (int j = 0; j < piece.getCount(); j++) {
+                    uiPieces.add(new StructPiece(i, piece.getOwner().getColor(), j));
+                }
             }
-        }
 
+        }
         boardPublisher.submit(uiPieces);
     }
+
 
     public Player getCurrentPlayer() {
         return players.get(turn);

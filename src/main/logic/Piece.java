@@ -95,9 +95,15 @@ public class Piece extends Entity {
                 return null;
             } else {
                 // 상대 팀 → 잡기
+                int capturedCount = other.getCount();
                 other.owner.removePiece(other);
                 dest.removePiece(this);
                 dest.setPiece(this);
+
+                // 말 하나에 count > 1일 수 있으므로 반환용 dummy Piece 생성
+                Piece captured = new Piece(other.owner);
+                captured.setSlot(null);
+                captured.count = capturedCount;
                 return other;  // 여기서 true 반환
             }
         }
