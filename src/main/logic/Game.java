@@ -1,17 +1,16 @@
 package main.logic;
 
 
-import main.view.PieceSelectPanel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;
 
-
 public class Game{
     private final SubmissionPublisher<List<StructPiece>> boardPublisher = new SubmissionPublisher<>();
     private final SubmissionPublisher<boolean[]> sticksPublisher = new SubmissionPublisher<>();
-    private GameEventListener listener;
+    private final SubmissionPublisher<Piece> capturedPublisher = new SubmissionPublisher<>();
+    private final SubmissionPublisher<Player> userPublisher = new SubmissionPublisher<>();
 
     private final Board board;
     private Sticks sticks = new Sticks();
@@ -19,10 +18,6 @@ public class Game{
     private int turn = 0;
     private int polygon = 4;
     private int additionalThrow = 0;
-
-    public void setGameEventListener(GameEventListener listener) {
-        this.listener = listener;
-    }
     private List<Integer> pendingThrows = new ArrayList<>();
 
     public Game(int polygon, int teamCount, String[] colors, int piecePerTeam) {
@@ -75,18 +70,6 @@ public class Game{
         sticksPublisher.submit(arr);
     }
 
-    public void chooseSticks(){
-        int result = 0;
-        //TODO 이거 함수 안쓰입니다!!
-        pendingThrows.add(result);
-        System.out.println("Throw result: " + result);
-
-        // 윷 던진 결과를 StickPanel에 반영
-        boolean[] arr = Arrays.copyOf(sticks.getFaces(), 5);
-        arr[4] = sticks.isBackdo();
-        sticksPublisher.submit(arr);
-    }
-
     /**말 선택*/
     public Piece selectPiece(int slotIdx){
         if(slotIdx == -1) return null;
@@ -105,16 +88,10 @@ public class Game{
             target.setSlot(board.getStart());
 
             // 새 말을 꺼냈으므로 이벤트로 UI에 알림
-            if (listener != null) {
-                listener.onPieceUsed(current);
-                System.out.println("Piece moved: " + current);
-            }
+            userPublisher.submit(current);
+            System.out.println("Piece moved: " + current);
         } else {
             target = current.getPieces().get(0);
-        }
-
-        for (Piece piece: current.getPieces()) {
-            System.out.println(piece.getCount());
         }
 
         BoardSlot dest = target.getMoveCandidate(moveValue, polygon);
@@ -129,16 +106,16 @@ public class Game{
                 additionalThrow --; // 추가 턴을 소모 했는데 말을 잡지 못한 경우
             }
         }
-        System.out.println("additionalThrow: " + additionalThrow);
+        //System.out.println("additionalThrow: " + additionalThrow);
         if(dest.num == -1){
             current.arrivePiece(target);
         }
 
         // 잡힌 말이 있으면 UI에 다시 표시
-        if (captured != null && listener != null) {
+        if (captured != null) {
             for (int i = 0; i < captured.getCount(); i++) {
                 Piece dummy = new Piece(captured.getOwner()); // 임시 말 생성
-                listener.onPieceCaptured(dummy);              // 개수만큼 UI에 표시
+                capturedPublisher.submit(dummy); // 개수만큼 UI에 표시
             }
         }
 
@@ -177,5 +154,13 @@ public class Game{
 
     public SubmissionPublisher<boolean[]> getSticksPublisher() {
         return sticksPublisher;
+    }
+
+    public SubmissionPublisher<Piece> getCapturedPublisher() {
+        return capturedPublisher;
+    }
+
+    public SubmissionPublisher<Player> getUserPublisher() {
+        return userPublisher;
     }
 }

@@ -46,4 +46,6 @@ public class Board {
     public BoardSlot getSlot(int num) { return slots[num]; }
 
     public BoardSlot getStart() { return slots[0]; }
+
+    public int getShape() { return polygon; }
 }

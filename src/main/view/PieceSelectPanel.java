@@ -1,17 +1,62 @@
 package main.view;
 
+import main.logic.Piece;
+import main.logic.Player;
 import main.model.GameConfig;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow;
 
 /**
  * 팀별 “남은 말” 목록을 버튼/아이콘으로 보여주는 패널
  *  ─ GameConfig 를 받아 동적으로 생성
  */
-public class PieceSelectPanel extends JPanel {
+public class PieceSelectPanel extends JPanel{
+    public class CapturedSubscriber implements Flow.Subscriber<Piece> {
+        private Flow.Subscription subscription;
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+        @Override
+        public void onNext(Piece piece) {
+            returnPiece(piece.getOwner().getColor());
+            subscription.request(1);
+        }
+        @Override
+        public void onError(Throwable throwable) {
+            System.out.println("PieceSelectPanel error: " + throwable);
+        }
+        @Override
+        public void onComplete() {
+            System.out.println("PieceSelectPanel updates complete");
+        }
+    }
+    public class UserSubscriber implements Flow.Subscriber<Player> {
+        private Flow.Subscription subscription;
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+        @Override
+        public void onNext(Player player) {
+            usePiece(player.getColor());
+            subscription.request(1);
+        }
+        @Override
+        public void onError(Throwable throwable) {
+            System.out.println("PieceSelectPanel error: " + throwable);
+        }
+        @Override
+        public void onComplete() {
+            System.out.println("PieceSelectPanel updates complete");
+        }
+    }
 
     /** 팀 색 순서 미리 정의 – 팀 수에 따라 앞에서부터 사용 */
     private final JButton newPieceBtn;
@@ -111,6 +156,7 @@ public class PieceSelectPanel extends JPanel {
         System.out.println("해당하는 teamColor를 찾지 못함: " + teamColor);
     }
 
-
+    public CapturedSubscriber getCapturedSubscriber() { return new CapturedSubscriber(); }
+    public UserSubscriber getUserSubscriber() { return new UserSubscriber(); }
 
 }
