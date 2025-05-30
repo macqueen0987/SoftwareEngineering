@@ -1,7 +1,6 @@
 package main.controller;
 
 import main.logic.Game;
-import main.logic.GameEventListener;
 import main.logic.Piece;
 import main.logic.Player;
 import main.model.GameConfig;
@@ -48,24 +47,14 @@ public class GameController {
         // 백엔드에서 발행하는 스트림 구독
         game.getBoardPublisher().subscribe(ui.boardPanel);
         game.getSticksPublisher().subscribe(ui.stickPanel);
+        game.getCapturedPublisher().subscribe(ui.piecePanel.getCapturedSubscriber());
+        game.getUserPublisher().subscribe(ui.piecePanel.getUserSubscriber());
 
         // 버튼 클릭 핸들러 (JavaFX)
         ui.randomThrowButton.setOnAction(e -> onThrowSticks());
         ui.forceThrowButton.setOnAction(e -> forceThrowSticks());
         ui.newPieceButton.setOnAction(e -> onNewPiece());
         ui.boardPanel.setSlotClickListener(this::onSelectSlot);
-
-        // 게임 이벤트 리스너
-        game.setGameEventListener(new GameEventListener() {
-            @Override
-            public void onPieceCaptured(Piece captured) {
-                ui.piecePanel.returnPiece(captured.getOwner().getColor());
-            }
-            @Override
-            public void onPieceUsed(Player player) {
-                ui.piecePanel.usePiece(player.getColor());
-            }
-        });
 
         updateStatus();
     }

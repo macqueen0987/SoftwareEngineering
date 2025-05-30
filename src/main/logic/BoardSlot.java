@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class BoardSlot extends Entity {
     private BoardSlot[] next;
     private BoardSlot[] prev;
-//    private Piece piece;
     private ArrayList<Piece> piece;
     public final int num;
 

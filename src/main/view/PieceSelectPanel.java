@@ -1,7 +1,10 @@
 package main.view;
 
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
+import main.logic.Piece;
+import main.logic.Player;
 import main.model.GameConfig;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -12,6 +15,7 @@ import javafx.scene.text.Font;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow;
 
 /**
  * 팀별 "남은 말" 목록을 버튼/아이콘으로 보여주는 JavaFX 패널
@@ -102,5 +106,64 @@ public class PieceSelectPanel extends VBox {
                 return;
             }
         }
+    }
+    public class CapturedSubscriber implements Flow.Subscriber<Piece> {
+        private Flow.Subscription subscription;
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+
+        @Override
+        public void onNext(Piece piece) {
+            Platform.runLater(() -> returnPiece(piece.getOwner().getColor()));
+            subscription.request(1);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            System.out.println("PieceSelectPanel error: " + throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("PieceSelectPanel updates complete");
+        }
+    }
+
+    public class UserSubscriber implements Flow.Subscriber<Player> {
+        private Flow.Subscription subscription;
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+
+        @Override
+        public void onNext(Player player) {
+            Platform.runLater(() -> usePiece(player.getColor()));
+            subscription.request(1);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            System.out.println("PieceSelectPanel error: " + throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("PieceSelectPanel updates complete");
+        }
+    }
+
+    public CapturedSubscriber getCapturedSubscriber() {
+        return new CapturedSubscriber();
+    }
+
+    public UserSubscriber getUserSubscriber() {
+        return new UserSubscriber();
     }
 }
