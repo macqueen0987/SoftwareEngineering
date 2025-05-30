@@ -106,7 +106,7 @@ public class StickPanel extends Pane implements Flow.Subscriber<boolean[]> {
                         ? ResourceLoader.backdo()
                         : ResourceLoader.stick(true);
             } else {
-                img = ResourceLoader.stick(faces[i]);
+                img = ResourceLoader.stick(!faces[i]);
             }
             gc.drawImage(img, x, 50, stickW, stickW);
             x += stickGap;
