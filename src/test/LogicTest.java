@@ -23,6 +23,7 @@ class TestCase {
 }
 
 public class LogicTest {
+    // caseIdx를 통해 4가지 testCase중 하나를 테스트
     static private final TestCase[] testCases = new TestCase[]{
             new TestCase(4, 2, 2),
             new TestCase(5,3,3),
@@ -45,15 +46,15 @@ public class LogicTest {
         int shape = board.getShape();
         if(shape == 4){
             moveTestCase = new int[][]{{0, 3, 3},{0, -1, 19},{5, 3, 20},{5, 4, 25},{10, 4, 27},
-                    {20, 2, 28},{20, -1, 22},{3, 5, 8},{15, -1, 14},{19, 1, -1}};
+                    {20, 2, 28},{20, -1, 22},{3, 5, 8},{15, -1, 14},{19, 1, -1},{20, 3, -1}};
         }
         else if (shape == 5){
             moveTestCase = new int[][]{{0, 3, 3},{0, -1, 24},{5, 3, 25},{5, 4, 32},{10, 4, 32},
-                    {25, 2, 35},{25, -1, 27},{3, 5, 8},{15, 5, 35},{20, -1, 19},{24, 1, -1}};
+                    {25, 2, 35},{25, -1, 27},{3, 5, 8},{15, 5, 35},{20, -1, 19},{24, 1, -1}, {25, 3, -1}};
         }
         else {
             moveTestCase = new int[][]{{0, 3, 3},{0, -1, 29},{5, 3, 30},{5, 4, 39},{10, 4, 39},
-                    {30, 2, 42},{30, -1, 32},{3, 5, 8},{15, 5, 42},{20, -1, 19},{29, 1, -1}};
+                    {30, 2, 42},{30, -1, 32},{3, 5, 8},{15, 5, 42},{20, -1, 19},{29, 1, -1}, {30, 3, -1}};
         }
     }
 
@@ -71,24 +72,6 @@ public class LogicTest {
             players[1].removePiece(pieces2.getLast());
         }
     }
-
-//    @RepeatedTest(10)
-//    void testAll() throws InterruptedException {
-//        testSticksThrow();
-//        testBoardInitialization();
-//        testBoardLinking();
-//        testPlayersInitialization();
-//        testAddPieceToBoard();
-//        testRemovePiece();
-//        testSelectPiece();
-//        testMoveCandidate();
-//        testMovePiece();
-//        testPieceCatch();
-//        testSticksPublisher();
-//        testBoardPublisher();
-//        testCapturedPublisher();
-//        testUserPublisher();
-//    }
 
     @Test
     void testSticksThrow(){
