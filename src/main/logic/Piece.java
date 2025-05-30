@@ -35,28 +35,13 @@ public class Piece extends Entity {
         }
         // 대각선 및 중앙 슬롯의 경우의 이동 처리
         if(candidate.num % 5 == 0 && (candidate.num / 5 <= (polygon + 1) / 2 && candidate.num / 5 > 0)) {
-            candidate = candidate.getNext()[1];
+            if (candidate.num == polygon * 5) candidate = candidate.getNext()[polygon / 2 - 1];
+            else candidate = candidate.getNext()[1];
             for(int step = 0; step < steps - 1; step++){
                 if(candidate.num == polygon * 5) {
                     candidate = candidate.getNext()[midToStart];
-                    break;
                 }
-                candidate = candidate.getNext()[0];
-                if(candidate.num == 0) {
-                    candidate = new BoardSlot(-1, polygon);
-                    break;
-                }
-            }
-            return candidate;
-        }
-        else if (candidate.num % 5 == 0 && candidate.num == polygon * 5){
-            candidate = candidate.getNext()[polygon / 2 - 1];
-            for(int step = 0; step < steps - 1; step++){
-                if(candidate.num == polygon * 5) {
-                    candidate = candidate.getNext()[midToStart];
-                    break;
-                }
-                candidate = candidate.getNext()[0];
+                else candidate = candidate.getNext()[0];
                 if(candidate.num == 0) {
                     candidate = new BoardSlot(-1, polygon);
                     break;
@@ -83,14 +68,12 @@ public class Piece extends Entity {
         slot.removePiece(this);
         slot = dest;
 
-        Piece caught = null;
-
         if (dest.getPiece() != null) {
             Piece other = dest.getPiece();
             if (other.owner == this.owner) {
                 // 같은 팀 → 합치기
                 other.count += this.count;
-                System.out.println("합쳐짐");
+                //System.out.println("합쳐짐");
                 owner.removePiece(this);
                 return null;
             } else {
@@ -104,10 +87,9 @@ public class Piece extends Entity {
                 Piece captured = new Piece(other.owner);
                 captured.setSlot(null);
                 captured.count = capturedCount;
-                return other;  // 여기서 true 반환
+                return other;
             }
         }
-
         dest.setPiece(this);
         return null;
     }

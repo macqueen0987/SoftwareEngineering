@@ -1,7 +1,6 @@
 package main.controller;
 
 import main.logic.Game;
-import main.logic.GameEventListener;
 import main.logic.Piece;
 import main.logic.Player;
 import main.model.GameConfig;
@@ -37,23 +36,13 @@ public class GameController {
 
         game.getBoardPublisher().subscribe(ui.boardPanel);
         game.getSticksPublisher().subscribe(ui.stickPanel);
+        game.getCapturedPublisher().subscribe(ui.piecePanel.getCapturedSubscriber());
+        game.getUserPublisher().subscribe(ui.piecePanel.getUserSubscriber());
 
         ui.randomThrowButton.addActionListener(e -> onThrowSticks());
         ui.newPieceButton.addActionListener(e -> onNewPiece());
         ui.boardPanel.setSlotClickListener(this::onSelectSlot);
         ui.forceThrowButton.addActionListener(e -> forceThrowSticks());
-        this.game.setGameEventListener(new GameEventListener() {
-            @Override
-            public void onPieceCaptured(Piece captured) {
-                ui.piecePanel.returnPiece(captured.getOwner().getColor());
-            }
-
-            @Override
-            public void onPieceUsed(Player player) {
-                ui.piecePanel.usePiece(player.getColor());
-            }
-        });
-
 
         updateStatus();
     }
