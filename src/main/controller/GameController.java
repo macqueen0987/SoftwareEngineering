@@ -11,11 +11,6 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-TODO: 여기 곳곳에 JOptionPane.showMessageDialog(null, "메시지")가 있는데, 이걸 UIComponents로 빼서
-UI는 완전히 분리해야 될것 같습니다. 안그러면 나중에 다른 UI를 사용하게 될때 여기저기 수정해야합니다.
-*/
-
 public class GameController {
 
     private final Game game;
@@ -24,7 +19,7 @@ public class GameController {
     private final JFrame mainFrame;
     private List<Integer> throwList;
     private boolean waitForClick = false;
-    private int moveValue;
+    private int moveValue = -2; // -2는 윷을 던지지 않은 상태를 의미
 
     public GameController(UIComponents ui, GameConfig config, String[] colors, JFrame mainFrame) {
         this.ui = ui;
@@ -67,7 +62,7 @@ public class GameController {
         /* 내가 원하는 윷의 결과를 지정할 수 있도록 하는 메소드 */
         while (true) {
             String[] options = {"백도", "도", "개", "걸", "윷", "모"};
-            int result = OptionPanel.select("윷 결과를 선택하세요", options);
+            int result = OptionPanel.select("윷 결과를 선택하세요.", "확인 후 취소를 눌러 선택을 완료하세요.", options);
 
             if (result == -1) break; // 취소한 경우
 
@@ -78,7 +73,12 @@ public class GameController {
     }
 
     private void onThrowSticks() {
+        if (!game.getPendingThrows().isEmpty() || moveValue >= -1) {
+            OptionPanel.alert("현재 던진 윷이 있습니다.");
+            return;
+        }
         game.throwSticks();
+        System.out.println(game.getPendingThrows());
         selectThrow();
     }
 
@@ -99,9 +99,14 @@ public class GameController {
         // 선택한 윷 값과 throwList 매칭 후 제거 및 적용
         moveValue = throwList.remove(selectedIndex);
         waitForClick = true;
+        System.out.println(game.getPendingThrows());
     }
 
     private void onNewPiece() {
+        if (game.getPendingThrows().isEmpty() && moveValue < -1){
+            OptionPanel.alert("먼저 윷을 던져야 합니다.");
+            return;
+        }
         Player current = game.getCurrentPlayer();
         ArrayList<Piece> pieces = game.getBoard().getStart().getPieces();
         for (Piece piece : pieces) {
@@ -140,7 +145,7 @@ public class GameController {
                 return;
             }
             game.movePiece(p, moveValue);
-
+            moveValue = -2; // 이동 후 초기화
             updateStatus();
             checkWinner();
             waitForClick = false;
