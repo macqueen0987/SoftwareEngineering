@@ -96,7 +96,7 @@ public class StickPanel extends JPanel implements Flow.Subscriber<boolean[]>{
                     img = ResourceLoader.stick(true).getImage(); // 나머지 앞면
                 }
             } else {
-                img = ResourceLoader.stick(faces[i]).getImage(); // 일반 상황
+                img = ResourceLoader.stick(!faces[i]).getImage();
             }
 
             g2.drawImage(img, x, 50, stickW, stickW, null);
